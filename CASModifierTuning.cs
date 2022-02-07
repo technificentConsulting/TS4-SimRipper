@@ -75,9 +75,11 @@ namespace TS4SimRipper
         //    return new List<ulong>();
         //}
 
-        public CASModifierTuning(Package[] gamePackages, string[] gamePackageNames, bool[] isCC, Form1 form)
+        public CASModifierTuning(Package[] packages, string[] packageNames, bool[] isCC, Form1 form, Dictionary<(uint, uint, ulong), string> allKeys, Dictionary<(uint, uint, ulong), string> allCCKeys)
         {
             this.tuning = new List<Tuning>();
+
+
             this.conversions = new List<Conversion>();
             //this.dampening = new List<Dampening>();
             string executingPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -88,91 +90,105 @@ namespace TS4SimRipper
             }
             Package p = (Package)Package.OpenPackage(1, resourcePath, false);
             List<IResourceIndexEntry> tuning = p.GetResourceList;
+            int tuningCount = 0;
             foreach (IResourceIndexEntry ires in tuning)
             {
+                tuningCount += 1;
                 if (ires.ResourceType != 0xF3ABFF3C) continue;
                 bool foundCC = false;
-                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == ires.ResourceType || r.ResourceType == 0x03B33DDF) & 
-                                                            r.Instance == ires.Instance;
-                for (int i = 0; i < gamePackages.Length; i++)
-                {
-                    if (isCC[i])
-                    {
-                        IResourceIndexEntry iresCC = gamePackages[i].Find(pred);
-                        if (iresCC != null)
-                        {
-                            Stream t = gamePackages[i].GetResource(iresCC);
-                            Stream s = new MemoryStream();
-                            t.CopyTo(s);
-                            s.Position = 0;
-                            form.TroubleshootPackageTuning.AddResource(iresCC, s, true);
-                            t.Position = 0;
 
-                            XmlTextReader reader = new XmlTextReader(t);
-                            while (reader.Read())
-                            {
-                                if (reader.NodeType == XmlNodeType.Element)
-                                {
-                                    string str = reader.GetAttribute("c");
-                                    if (str != null && String.Compare(str, "Client_CASModifierTuning") == 0)
-                                    {
-                                        this.tuning.Add(ParseTuning(reader));
-                                        foundCC = true;
-                                        break;
-                                    }
-                                    else if (str != null && String.Compare(str, "Client_CASModifierPartGenderDmaps") == 0)
-                                    {
-                                        this.conversions.Add(ParseConversion(reader));
-                                        foundCC = true;
-                                        break;
-                                    }
-                                    //else if (str != null && String.Compare(str, "Client_CASModifierDampening") == 0)
-                                    //{
-                                    //    this.dampening.Add(ParseDampening(reader));
-                                    //    foundCC = true;
-                                    //    break;
-                                    //}
-                                }
-                            }
+                (uint ResourceType, uint ResourceGroup, ulong Instance) key = (ires.ResourceType, ires.ResourceGroup, ires.Instance);
+                (uint ResourceType, uint ResourceGroup, ulong Instance) alternativeKey = (0x03B33DDF, ires.ResourceGroup, ires.Instance);
+
+                if (allCCKeys.ContainsKey(key) || allCCKeys.ContainsKey(alternativeKey))
+                {
+                    Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == ires.ResourceType || r.ResourceType == 0x03B33DDF) &
+                                            r.Instance == ires.Instance;
+                    Package ccPackage = (Package)Package.OpenPackage(1, allCCKeys[key], false);
+                    IResourceIndexEntry iresCC = ccPackage.Find(pred);
+                    if (iresCC != null)
+                        foundCC = ReadConversions(packages, form, foundCC, ccPackage, iresCC);
+
+
+                }
+
+                ReadCASModifiers(ref p, ires, foundCC);
+            }
+
+        }
+
+        private bool ReadConversions(Package[] gamePackages, Form1 form, bool foundCC, Package package, IResourceIndexEntry iresCC)
+        {
+            {
+                Stream t = package.GetResource(iresCC);
+                Stream s = new MemoryStream();
+                t.CopyTo(s);
+                s.Position = 0;
+                form.TroubleshootPackageTuning.AddResource(iresCC, s, true);
+                t.Position = 0;
+
+                XmlTextReader reader = new XmlTextReader(t);
+                while (reader.Read())
+                {
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        string str = reader.GetAttribute("c");
+                        if (str != null && String.Compare(str, "Client_CASModifierTuning") == 0)
+                        {
+                            this.tuning.Add(ParseTuning(reader));
+                            foundCC = true;
+                            break;
                         }
+                        else if (str != null && String.Compare(str, "Client_CASModifierPartGenderDmaps") == 0)
+                        {
+                            this.conversions.Add(ParseConversion(reader));
+                            foundCC = true;
+                            break;
+                        }
+                        //else if (str != null && String.Compare(str, "Client_CASModifierDampening") == 0)
+                        //{
+                        //    this.dampening.Add(ParseDampening(reader));
+                        //    foundCC = true;
+                        //    break;
+                        //}
                     }
                 }
-                if (!foundCC)
-                {
-                    XmlTextReader reader = new XmlTextReader(p.GetResource(ires));
-                    while (reader.Read())
-                    {
-                        if (reader.NodeType == XmlNodeType.Element)
-                        {
-                            string str = reader.GetAttribute("c");
-                            if (str != null && String.Compare(str, "Client_CASModifierTuning") == 0)
-                            {
-                                this.tuning.Add(ParseTuning(reader));
-                            }
-                            else if (str != null && String.Compare(str, "Client_CASModifierPartGenderDmaps") == 0)
-                            {
-                                Conversion conv = ParseConversion(reader);
-                                bool found = false;
-                                for (int i = 0; i < this.conversions.Count; i++)
-                                {
-                                    if (this.conversions[i].species == conv.species && this.conversions[i].occult == conv.occult && 
-                                        this.conversions[i].age == conv.age && this.conversions[i].gender == conv.gender &&
-                                        this.conversions[i].partBodyType == conv.partBodyType && this.conversions[i].partGender == conv.partGender)
-                                    {
-                                        foreach (var c in conv.dmapConversion) this.conversions[i].dmapConversion.Add(c.Key, c.Value);
-                                        found = true;
-                                        break;
-                                    }
+            }
 
+            return foundCC;
+        }
+
+        private void ReadCASModifiers(ref Package p, IResourceIndexEntry ires, bool foundCC)
+        {
+            if (!foundCC)
+            {
+                XmlTextReader reader = new XmlTextReader(p.GetResource(ires));
+                while (reader.Read())
+                {
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        string str = reader.GetAttribute("c");
+                        if (str != null && String.Compare(str, "Client_CASModifierTuning") == 0)
+                        {
+                            this.tuning.Add(ParseTuning(reader));
+                        }
+                        else if (str != null && String.Compare(str, "Client_CASModifierPartGenderDmaps") == 0)
+                        {
+                            Conversion conv = ParseConversion(reader);
+                            bool found = false;
+                            for (int i = 0; i < this.conversions.Count; i++)
+                            {
+                                if (this.conversions[i].species == conv.species && this.conversions[i].occult == conv.occult &&
+                                    this.conversions[i].age == conv.age && this.conversions[i].gender == conv.gender &&
+                                    this.conversions[i].partBodyType == conv.partBodyType && this.conversions[i].partGender == conv.partGender)
+                                {
+                                    foreach (var c in conv.dmapConversion) this.conversions[i].dmapConversion.Add(c.Key, c.Value);
+                                    found = true;
+                                    break;
                                 }
-                                if (!found) this.conversions.Add(conv);
+
                             }
-                            //else if (str != null && String.Compare(str, "Client_CASModifierDampening") == 0)
-                            //{
-                            //    this.dampening.Add(ParseDampening(reader));
-                            //    foundCC = true;
-                            //    break;
-                            //}
+                            if (!found) this.conversions.Add(conv);
                         }
                     }
                 }

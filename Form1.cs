@@ -94,11 +94,12 @@ namespace TS4SimRipper
                 DMap normals = FetchGameDMap(new TGI((uint)ResourceTypes.DeformerMap, 0, normalID), ref startupErrors);
                 if (shape != null && normals != null) frameBoobs = new MorphMap[] { shape.ToMorphMap(), normals.ToMorphMap() };
             }
+			
+			try
+			{
+            CASTuning = new CASModifierTuning(gamePackages, gamePackageNames, notBaseGame, this, allInstances, allCCInstances);
+			}
 
-            try
-            {
-                CASTuning = new CASModifierTuning(gamePackages, gamePackageNames, notBaseGame, this);
-            }
             catch (Exception e)
             {
                 startupErrors += "CASModifierTuning: " + e.Message + Environment.NewLine;
@@ -1315,6 +1316,7 @@ namespace TS4SimRipper
             {
                 CurrentModel[i] = LoadDMapMorph(BaseModel[i], pregnantModifier[0], pregnantModifier[1]);
             }
+            UpdateSlotTargets();
             morphPreview1.Stop_Mesh();
             morphPreview1.Start_Mesh(CurrentModel, GlassModel, currentTexture, currentClothingSpecular, 
                 currentGlassTexture, currentGlassSpecular, true, SeparateMeshes_comboBox.SelectedIndex == 2);

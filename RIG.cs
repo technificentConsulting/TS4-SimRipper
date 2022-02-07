@@ -254,7 +254,7 @@ namespace TS4SimRipper
                 tmp += bones[i].ToString() + Environment.NewLine + Environment.NewLine;
             }
             tmp += IKchainCount.ToString() + " IK Chains:" + Environment.NewLine + Environment.NewLine;
-            for (int i = 0; i < IKchainCount; i++)
+            for (int i = 0; i < IKchainCount; i++) 
             {
                 tmp += IKchains[i].ToString() + Environment.NewLine + Environment.NewLine;
             }
@@ -284,6 +284,7 @@ namespace TS4SimRipper
             public int ParentBoneIndex { get { return this.parentBoneIndex; } }
             public RIG.Bone ParentBone { get { if (this.parentBoneIndex >= 0) { return this.rig.bones[parentBoneIndex]; } else { return null; } } }
             public string ParentName { get { if (this.parentBoneIndex >= 0) { return rig.bones[this.parentBoneIndex].boneName; } else { return ""; } } }
+
             public string OpposingBoneName
             {
                 get
@@ -296,7 +297,7 @@ namespace TS4SimRipper
             /// <summary>
             /// Returns position relative to parent bone
             /// </summary>
-            public Vector3 PositionVector { get { return new Vector3(this.position); } }
+            public Vector3 PositionVector { get { return new Vector3(this.position); } set { this.position = new List<float>() { value.X, value.Y, value.Z }.ToArray(); } }
             public Vector3 ScalingVector { get { return new Vector3(this.scaling); } }
             public Quaternion LocalRotation { get { return new Quaternion(this.localRotation.Coordinates); } }
             public Quaternion GlobalRotation { get { return new Quaternion(this.globalRotation.Coordinates); } }

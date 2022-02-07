@@ -87,7 +87,7 @@ namespace TS4SimRipper
             Vector3 unit = new Vector3(1f, 1f, 1f);
             string missingBones = "";
             float weight = boneDelta.weight;
-
+            
             foreach (GEOM morphMesh in baseMeshes)
             {
                 if (morphMesh == null) continue;
@@ -121,6 +121,7 @@ namespace TS4SimRipper
                 }
 
                 morphMesh.UpdatePositions();
+
             }
 
             if (missingBones.Length > 0)
@@ -145,6 +146,7 @@ namespace TS4SimRipper
 
                 rig.BoneMorpher(bone, weight, localScale, localOffset, localRotation);
             }
+
         }
 
         public static GEOM LoadBGEOMorph(GEOM baseMesh, BGEO morph, int lod)
@@ -603,8 +605,8 @@ namespace TS4SimRipper
                         {
                             if (head != null && !geom.hasVertexIDs) geom.AutoVertexID(head);
                         }
-                       // if (head != null && meshRegions[m].partType == BodyType.Hair) geom.SnapVerticesToHead(head);
-                        
+                        // if (head != null && meshRegions[m].partType == BodyType.Hair) geom.SnapVerticesToHead(head);
+
                         if (geom.hasVertexIDs)
                         {
                             foreach (BGEO b in morphBGEO)
@@ -783,10 +785,11 @@ namespace TS4SimRipper
                         CurrentModel[i] = BaseModel[i] != null ? new GEOM(BaseModel[i]) : null;
                     }
                 }
-
+                UpdateSlotTargets();
                 // imageStack.Sort((x, y) => x.sortLayer.CompareTo(y.sortLayer));
                 // imageStack.OrderByDescending(s => s.compositionMethod).ThenBy(s => s.sortLayer).ToList();
-                imageStack.Sort((x, y) => {
+                imageStack.Sort((x, y) =>
+                {
                     int ret = -x.compositionMethod.CompareTo(y.compositionMethod);
                     return ret != 0 ? ret : x.sortLayer.CompareTo(y.sortLayer);
                 });
@@ -1112,6 +1115,79 @@ namespace TS4SimRipper
                     }
                     if (currentOverlay != null) g.DrawImage(currentOverlay, new Point(0, 0));
                 }
+            }
+        }
+
+        private void UpdateSlotTargets()
+        {
+            Dictionary<RIG.Bone, Vector3> morphedSlotBasePosition = new Dictionary<RIG.Bone, Vector3>();
+            Dictionary<RIG.Bone, Vector3> morphedSlotBasePositionOffsets = new Dictionary<RIG.Bone, Vector3>();
+
+            foreach (GEOM morphMesh in CurrentModel)
+            {
+                if (morphMesh == null)
+                    continue;
+                int slotRayIdx = 0;
+                foreach (GEOM.SlotrayIntersection slotRayIntersection in morphMesh.SlotrayAdjustments)
+                {
+                    //How Slot Ray Intersections work is simple, they specify three vertices specifying a face and barycentric coordinates.
+                    //The barycentric coordinates specify the exact point on the face where the slot's base position should be.
+                    //Then, we add offsetFromIntersectionOSForExport to the slot base position.
+                    //Note that these two positions are in world space!
+
+                    //Next, we check if currentBone already exists in morphedSlotBasePosition. If it exists already, then it will compare
+                    //the two slots' magnitude to determine what is further away from the sim.
+                    //This is necessary because multiple cas assets can affect the same slot.
+                    //If the currentBone doesn't exist, it just sets the position and the offsets as usual.
+
+                    //get bone hash of slot
+                    uint slotBone = slotRayIntersection.SlotIndex;
+                    //get verts specified for the intersection
+                    int[] vertIndices = slotRayIntersection.TrianglePointIndices;
+                    //get the barycentric coordinates for the intersection
+                    Vector2 coordinates = slotRayIntersection.Coordinates;
+                    //offset from intersection OS is the offset of the slot from the point on the face.
+                    Vector3 offsetFromIntersectionOS = slotRayIntersection.OffsetFromIntersectionOS;
+                    //get vertex positions AFTER dmaps and bonedeltas
+                    Vector3[] vertexPositions = morphMesh.SlotrayTrianglePositions(slotRayIdx);
+                    //calculate the point on the face from the barycentric coordinates
+                    float xPos = (1 - coordinates.X - coordinates.Y) * vertexPositions[0].X + (coordinates.X * vertexPositions[1].X) + (coordinates.Y * vertexPositions[2].X);
+                    float yPos = (1 - coordinates.X - coordinates.Y) * vertexPositions[0].Y + (coordinates.X * vertexPositions[1].Y) + (coordinates.Y * vertexPositions[2].Y);
+                    float zPos = (1 - coordinates.X - coordinates.Y) * vertexPositions[0].Z + (coordinates.X * vertexPositions[1].Z) + (coordinates.Y * vertexPositions[2].Z);
+                    Vector3 slotBasePosition = new Vector3(xPos, yPos, zPos);
+                    Vector3 offsetFromIntersectionOSForExport = new Vector3(offsetFromIntersectionOS.X, offsetFromIntersectionOS.Y, offsetFromIntersectionOS.Z);
+                    RIG.Bone currentBone = currentRig.GetBone(slotBone);
+
+                    if (morphedSlotBasePosition.ContainsKey(currentBone))
+                    {
+                        if (morphedSlotBasePosition[currentBone].Magnitude < slotBasePosition.Magnitude)
+                        {
+                            morphedSlotBasePosition[currentBone] = slotBasePosition;
+                            morphedSlotBasePositionOffsets[currentBone] = offsetFromIntersectionOSForExport;
+                        }
+                    }
+                    else
+                    {
+                        morphedSlotBasePosition[currentBone] = slotBasePosition;
+                        morphedSlotBasePositionOffsets[currentBone] = offsetFromIntersectionOSForExport;
+
+                    }
+                    slotRayIdx += 1;
+
+                }
+            }
+            //Finally, it adds the base slot position and the offset together. It also has to be converted to local space as the position is in world space.
+            // NOTE! I had to make a setter for PositionVector. I didn't see any functions for updating a bone's position but not it's rotation.
+            // Finally, calculate transforms.
+
+            foreach (RIG.Bone slot in morphedSlotBasePosition.Keys)
+            {
+                Vector3 basePosition = morphedSlotBasePosition[slot];
+                Vector3 offsetForBasePosition = morphedSlotBasePositionOffsets[slot];
+
+                Vector3 pos = (slot.ParentBone.GlobalTransform.Inverse() * slot.LocalRotation.toMatrix4D(basePosition + offsetForBasePosition)).Offset;
+                slot.PositionVector = pos;
+                slot.CalculateTransforms();
             }
         }
 

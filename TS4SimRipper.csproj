@@ -82,6 +82,7 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
     <Prefer32Bit>false</Prefer32Bit>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -117,42 +118,50 @@
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DDSPanel, Version=2103.4.1511.18344, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="DDSPanel, Version=2002.10.2050.28504, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\SourceTree\Sims4Tools\s4pi Library\DDSPanel.dll</HintPath>
+      <HintPath>.\DDSPanel.dll</HintPath>
     </Reference>
-    <Reference Include="Ookii.Dialogs">
-      <HintPath>F:\OokiiDialogs\Ookii.Dialogs.dll</HintPath>
+    <Reference Include="Ookii.Dialogs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c15020868fd6249, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Ookii.Dialogs.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="protobuf-net">
-      <HintPath>F:\Sims4Workspace\Protobuf\protobuf-net.dll</HintPath>
-    </Reference>
-    <Reference Include="s4pi.ImageResource">
-      <HintPath>F:\SourceTree\Sims4Tools\bin\Debug\s4pi.ImageResource.dll</HintPath>
-    </Reference>
-    <Reference Include="s4pi.Interfaces, Version=2103.4.1511.18337, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="protobuf-net, Version=2.0.0.668, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\SourceTree\Sims4Tools\s4pi Library\s4pi.Interfaces.dll</HintPath>
+      <HintPath>.\protobuf-net.dll</HintPath>
     </Reference>
-    <Reference Include="s4pi.Package, Version=2103.4.1511.18343, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="s4pi.ImageResource, Version=2104.21.1540.19202, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\SourceTree\Sims4Tools\s4pi Library\s4pi.Package.dll</HintPath>
+      <HintPath>.\s4pi.ImageResource.dll</HintPath>
     </Reference>
-    <Reference Include="s4pi.Settings, Version=2002.10.2049.28496, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="s4pi.Interfaces, Version=2002.10.2049.28497, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\SourceTree\Sims4Tools\s4pi Library\s4pi.Settings.dll</HintPath>
+      <HintPath>.\s4pi.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="s4pi.Package, Version=2002.10.2050.28502, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\s4pi.Package.dll</HintPath>
+    </Reference>
+    <Reference Include="s4pi.Settings, Version=2103.7.1628.20645, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\s4pi.Settings.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Custom, Version=2002.10.2049.28496, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\System.Custom.dll</HintPath>
+    </Reference>
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -234,15 +243,19 @@
     <Content Include="CASModifierTuning.package">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="Resources\DogSkin.png" />
-    <None Include="Resources\CatSkin.png" />
-    <None Include="Resources\HeadMouthColor.png" />
-    <Content Include="squishinterface_Win32.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="squishinterface_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="packages.config" />
+    <None Include="Resources\DogSkin.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CatSkin.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\HeadMouthColor.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -267,15 +280,33 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="Resources\cuBodyComplete_lod0.simgeom" />
-    <None Include="Resources\cuHead_lod0.simgeom" />
-    <None Include="Resources\puBodyComplete_lod0.simgeom" />
-    <None Include="Resources\puHead_lod0.simgeom" />
-    <None Include="Resources\WaistFiller.simgeom" />
-    <None Include="Resources\yfBodyComplete_lod0.simgeom" />
-    <None Include="Resources\yfHead_lod0.simgeom" />
-    <None Include="Resources\ymBodyComplete_lod0.simgeom" />
-    <None Include="Resources\ymHead_lod0.simgeom" />
+    <None Include="Resources\cuBodyComplete_lod0.simgeom">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\cuHead_lod0.simgeom">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\puBodyComplete_lod0.simgeom">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\puHead_lod0.simgeom">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\WaistFiller.simgeom">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\yfBodyComplete_lod0.simgeom">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\yfHead_lod0.simgeom">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\ymBodyComplete_lod0.simgeom">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\ymHead_lod0.simgeom">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="S4_AdultCat_RIG.grannyrig">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

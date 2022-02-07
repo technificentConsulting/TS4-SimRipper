@@ -11,6 +11,7 @@ using ProtoBuf;
 using s4pi.Package;
 using s4pi.Interfaces;
 using s4pi.ImageResource;
+using System.Collections.Generic;
 
 namespace TS4SimRipper
 {
@@ -22,6 +23,9 @@ namespace TS4SimRipper
         public Package TroubleshootPackageTuning = (Package)Package.NewPackage(0);
         Package TroubleshootPackageBasic = (Package)Package.NewPackage(0);
         Package TroubleshootPackageOutfit = (Package)Package.NewPackage(0);
+        public Dictionary<(uint, uint, ulong),  string> allInstances = new Dictionary<(uint, uint, ulong), string>();
+        public Dictionary<(uint, uint, ulong), string> allCCInstances = new Dictionary<(uint, uint, ulong), string>();
+
 
         private bool DetectFilePaths()
         {
@@ -102,10 +106,29 @@ namespace TS4SimRipper
             {
                 List<string> pathsSim = new List<string>(Directory.GetFiles(TS4FilesPath, "Simulation*Build*.package", SearchOption.AllDirectories));
                 List<string> pathsClient = new List<string>(Directory.GetFiles(TS4FilesPath, "Client*Build*.package", SearchOption.AllDirectories));
-                pathsSim.Sort();
-                pathsClient.Sort();
-                paths.AddRange(pathsClient);
-                paths.AddRange(pathsSim);
+                List<string> pathsNoLegacySim = new List<string>();
+                List<string> pathsNoLegacyClient = new List<string>();
+
+                for (int i = 0; i < pathsSim.Count; i++)
+                {
+                    if (!pathsSim[i].Contains("Delta_LE"))
+                    {
+                        pathsNoLegacySim.Add(pathsSim[i]);
+                    }
+                }
+                for (int i = 0; i < pathsClient.Count; i++)
+                {
+                    if (!pathsClient[i].Contains("Delta_LE"))
+                    {
+                        pathsNoLegacyClient.Add(pathsClient[i]);
+                    }
+                }
+
+
+                pathsNoLegacySim.Sort();
+                pathsNoLegacyClient.Sort();
+                paths.AddRange(pathsNoLegacySim);
+                paths.AddRange(pathsNoLegacyClient);
             }
             catch (DirectoryNotFoundException e)
             {
@@ -143,25 +166,46 @@ namespace TS4SimRipper
                 string err = "";
                 for (int i = 0; i < paths.Count; i++)
                 {
+                    if (paths[i].Contains("Delta_LE"))
+                    {
+                        continue;
+                    }
+
                     try
                     {
                         Package p = OpenPackage(paths[i], false);
                         if (p == null)
                         {
+
                             err += paths[i] + " is NULL" + Environment.NewLine;
                             paths[i] = null;
                             continue;
                         }
-                        IResourceIndexEntry testIrie = p.Find(testPred);
+                        else
+                        {
+                            foreach (IResourceIndexEntry indexEntry in p.GetResourceList)
+                            {
+
+                                (uint ResourceType, uint ResourceGroup, ulong Instance) key = (indexEntry.ResourceType, indexEntry.ResourceGroup, indexEntry.Instance);
+
+                                if (!this.allInstances.ContainsKey(key))
+                                {
+                                    this.allInstances.Add(key, paths[i]);
+                                }
+                            }
+                        }
                         gamePacks.Add(p);
                         notBase.Add(!paths[i].Contains("\\Data\\"));
                     }
+
                     catch (Exception e)
                     {
                         err += paths[i] + " : " + e.Message + Environment.NewLine;
                         paths[i] = null;
                     }
                 }
+
+
                 if (err.Length > 0) MessageBox.Show("Unable to open the following game packages:" + Environment.NewLine + err);
 
                 List<Package> ccPacks = new List<Package>();
@@ -184,25 +228,37 @@ namespace TS4SimRipper
                     // ccPaths.Sort((a, b) => b.CompareTo(a));     //descending sort
                     ccPaths.Sort();
                     err = "";
-                    for (int i = 0; i < ccPaths.Count; i++)
+                    for (int j = 0; j < ccPaths.Count; j++)
                     {
                         try
                         {
-                            Package p = OpenPackage(ccPaths[i], false);
+                            Package p = OpenPackage(ccPaths[j], false);
                             if (p == null)
                             {
-                                err += ccPaths[i] + " is NULL" + Environment.NewLine;
-                                ccPaths[i] = null;
+                                err += ccPaths[j] + " is NULL" + Environment.NewLine;
+                                ccPaths[j] = null;
                                 continue;
                             }
-                            IResourceIndexEntry testIrie = p.Find(testPred);
+                            else
+                            {
+                                foreach (IResourceIndexEntry indexEntry in p.GetResourceList)
+                                {
+                                    (uint ResourceType, uint ResourceGroup, ulong Instance) key = (indexEntry.ResourceType, indexEntry.ResourceGroup, indexEntry.Instance);
+
+                                    if (!this.allCCInstances.ContainsKey(key))
+                                    {
+                                        this.allCCInstances.Add(key, paths[j]);
+
+                                    }
+                                }
+                            }
                             ccPacks.Add(p);
                             isCC.Add(true);
                         }
                         catch (Exception e)
                         {
-                            err += ccPaths[i] + " : " + e.Message + Environment.NewLine;
-                            ccPaths[i] = null;
+                            err += ccPaths[j] + " : " + e.Message + Environment.NewLine;
+                            ccPaths[j] = null;
                         }
                     }
                     if (err.Length > 0) MessageBox.Show("Unable to open the following mod packages:" + Environment.NewLine + err);
@@ -227,7 +283,6 @@ namespace TS4SimRipper
                 MessageBox.Show(e.Message + Environment.NewLine + e.StackTrace);
                 return false;
             }
-
             return true;
         }
 
