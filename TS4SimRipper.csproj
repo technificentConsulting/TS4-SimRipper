@@ -119,33 +119,36 @@
   <ItemGroup>
     <Reference Include="DDSPanel, Version=2103.4.1511.18344, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\SourceTree\Sims4Tools\s4pi Library\DDSPanel.dll</HintPath>
+      <HintPath>.\DDSPanel.dll</HintPath>
     </Reference>
     <Reference Include="Ookii.Dialogs">
-      <HintPath>F:\OokiiDialogs\Ookii.Dialogs.dll</HintPath>
+      <HintPath>.\Ookii.Dialogs.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="protobuf-net">
-      <HintPath>F:\Sims4Workspace\Protobuf\protobuf-net.dll</HintPath>
+      <HintPath>.\protobuf-net.dll</HintPath>
     </Reference>
     <Reference Include="s4pi.ImageResource">
-      <HintPath>F:\SourceTree\Sims4Tools\bin\Debug\s4pi.ImageResource.dll</HintPath>
+      <HintPath>.\s4pi.ImageResource.dll</HintPath>
     </Reference>
     <Reference Include="s4pi.Interfaces, Version=2103.4.1511.18337, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\SourceTree\Sims4Tools\s4pi Library\s4pi.Interfaces.dll</HintPath>
+      <HintPath>.\s4pi.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="s4pi.Package, Version=2103.4.1511.18343, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\SourceTree\Sims4Tools\s4pi Library\s4pi.Package.dll</HintPath>
+      <HintPath>.\s4pi.Package.dll</HintPath>
     </Reference>
     <Reference Include="s4pi.Settings, Version=2002.10.2049.28496, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\SourceTree\Sims4Tools\s4pi Library\s4pi.Settings.dll</HintPath>
+      <HintPath>.\s4pi.Settings.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Custom">
+      <HintPath>.\System.Custom.dll</HintPath>
+    </Reference>
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xaml" />
@@ -255,6 +258,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Properties\app.manifest" />
