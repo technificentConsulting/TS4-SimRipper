@@ -226,8 +226,3 @@ project.lock.json
 DDSPanel.dll
 Ookii.Dialogs.dll
 protobuf-net.dll
-s4pi.ImageResource.dll
-s4pi.Package.dll
-s4pi.Interfaces.dll
-s4pi.Settings.dll
-System.Custom.dll
