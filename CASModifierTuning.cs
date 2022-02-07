@@ -75,7 +75,7 @@ namespace TS4SimRipper
         //    return new List<ulong>();
         //}
 
-        public CASModifierTuning(Package[] packages, string[] packageNames, bool[] isCC, Form1 form, Dictionary<(uint, uint, ulong), string> allKeys, Dictionary<(uint, uint, ulong), string> allCCKeys)
+        public CASModifierTuning(Package[] packages, string[] packageNames, bool[] isCC, Form1 form, Dictionary<(uint, uint, ulong), (string, Package)> allKeys, Dictionary<(uint, uint, ulong), (string, Package)> allCCKeys)
         {
             this.tuning = new List<Tuning>();
 
@@ -100,17 +100,27 @@ namespace TS4SimRipper
                 (uint ResourceType, uint ResourceGroup, ulong Instance) key = (ires.ResourceType, ires.ResourceGroup, ires.Instance);
                 (uint ResourceType, uint ResourceGroup, ulong Instance) alternativeKey = (0x03B33DDF, ires.ResourceGroup, ires.Instance);
 
-                if (allCCKeys.ContainsKey(key) || allCCKeys.ContainsKey(alternativeKey))
+                if (allCCKeys.ContainsKey(key))
                 {
                     Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == ires.ResourceType || r.ResourceType == 0x03B33DDF) &
                                             r.Instance == ires.Instance;
-                    Package ccPackage = (Package)Package.OpenPackage(1, allCCKeys[key], false);
+                    Package ccPackage = allCCKeys[key].Item2;
                     IResourceIndexEntry iresCC = ccPackage.Find(pred);
                     if (iresCC != null)
                         foundCC = ReadConversions(packages, form, foundCC, ccPackage, iresCC);
-
-
                 }
+
+                else if (allCCKeys.ContainsKey(alternativeKey))
+                    {
+                        Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == ires.ResourceType || r.ResourceType == 0x03B33DDF) &
+                                                r.Instance == ires.Instance;
+                        Package ccPackage = allCCKeys[alternativeKey].Item2;
+                        IResourceIndexEntry iresCC = ccPackage.Find(pred);
+                        if (iresCC != null)
+                            foundCC = ReadConversions(packages, form, foundCC, ccPackage, iresCC);
+                    }
+                
+
 
                 ReadCASModifiers(ref p, ires, foundCC);
             }

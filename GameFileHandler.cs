@@ -23,9 +23,9 @@ namespace TS4SimRipper
         public Package TroubleshootPackageTuning = (Package)Package.NewPackage(0);
         Package TroubleshootPackageBasic = (Package)Package.NewPackage(0);
         Package TroubleshootPackageOutfit = (Package)Package.NewPackage(0);
-        public Dictionary<(uint, uint, ulong),  string> allMaxisInstances = new Dictionary<(uint, uint, ulong), string>();
-        public Dictionary<(uint, uint, ulong), string> allCCInstances = new Dictionary<(uint, uint, ulong), string>();
-        public Dictionary<(uint, uint, ulong), string> allInstances = new Dictionary<(uint, uint, ulong), string>();
+        public Dictionary<(uint, uint, ulong), (string, Package)> allMaxisInstances = new Dictionary<(uint, uint, ulong), (string, Package)>();
+        public Dictionary<(uint, uint, ulong), (string, Package)> allCCInstances = new Dictionary<(uint, uint, ulong), (string, Package)>();
+        public Dictionary<(uint, uint, ulong), (string, Package)> allInstances = new Dictionary<(uint, uint, ulong), (string, Package)>();
 
 
         private bool DetectFilePaths()
@@ -191,12 +191,12 @@ namespace TS4SimRipper
 
                                 if (!this.allMaxisInstances.ContainsKey(key))
                                 {
-                                    this.allMaxisInstances.Add(key, paths[i]);
+                                    this.allMaxisInstances.Add(key, (paths[i], p));
                                 }
 
                                 if (!this.allInstances.ContainsKey(key))
                                 {
-                                    this.allInstances.Add(key, paths[i]);
+                                    this.allInstances.Add(key, (paths[i], p));
                                 }
                             }
                         }
@@ -253,12 +253,12 @@ namespace TS4SimRipper
 
                                     if (!this.allCCInstances.ContainsKey(key))
                                     {
-                                        this.allCCInstances.Add(key, paths[j]);
+                                        this.allCCInstances.Add(key, (paths[j], p));
 
                                     }
                                     if (!this.allInstances.ContainsKey(key))
                                     {
-                                        this.allInstances.Add(key, paths[i]);
+                                        this.allInstances.Add(key, (paths[j], p));
                                     }
                                 }
                             }
@@ -321,17 +321,19 @@ namespace TS4SimRipper
 
         private Sculpt FetchGameSculpt(TGI tgi, ref string errorMsg)
         {
-            if (tgi.Instance == 0ul) return null; 
+            if (tgi.Instance == 0ul) return null;
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+
             Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
-            {
-                Package p = gamePackages[i];
+            if (this.allInstances.ContainsKey(key))
+            {  
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
-                if (irie != null)
-                {
+                    if (irie != null)
+                    {
                     using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
                     {
-                        if (notBaseGame[i]) SaveStream(irie, br, TroubleshootPackageBasic);
+                        if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, br, TroubleshootPackageBasic);
                         try
                         {
                             Sculpt sculpt = new Sculpt(br);
@@ -339,7 +341,7 @@ namespace TS4SimRipper
                         }
                         catch (Exception e)
                         {
-                            errorMsg += "Can't read Sculpt " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                            errorMsg += "Can't read Sculpt " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
                             return null;
                         }
                     }
@@ -351,16 +353,16 @@ namespace TS4SimRipper
         private SMOD FetchGameSMOD(TGI tgi, ref string errorMsg)
         {
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
-            {
-                Package p = gamePackages[i];
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+            if (this.allInstances.ContainsKey(key)) { 
+                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
                     {
-                        if (notBaseGame[i]) SaveStream(irie, br, TroubleshootPackageBasic);
+                        if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, br, TroubleshootPackageBasic);
                         try
                         {
                             SMOD smod = new SMOD(br);
@@ -368,7 +370,7 @@ namespace TS4SimRipper
                         }
                         catch (Exception e)
                         {
-                            errorMsg += "Can't read SimModifier " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                            errorMsg += "Can't read SimModifier " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
                             return null;
                         }
                     }
@@ -379,55 +381,67 @@ namespace TS4SimRipper
         }
         private BGEO FetchGameBGEO(TGI tgi, ref string errorMsg)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
+
                 if (irie != null)
-                {
+            {
                     using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
                     {
-                        if (notBaseGame[i]) SaveStream(irie, br, TroubleshootPackageBasic);
+                        if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, br, TroubleshootPackageBasic);
                         try
                         { 
-                            BGEO bgeo = new BGEO(br);
-                            return bgeo;
-                        }
-                        catch (Exception e)
-                        {
-                            errorMsg += "Can't read BGEO " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
-                            return null;
-                        }
+                        BGEO bgeo = new BGEO(br);
+                        return bgeo;
+                    }
+                    catch (Exception e)
+                    {
+
+                         errorMsg += "Can't read BGEO " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
+                        return null;
                     }
                 }
+              }
             }
             errorMsg += "Can't find BGEO " + tgi.ToString() + Environment.NewLine;
             return null;
         }
         private DMap FetchGameDMap(TGI tgi, ref string errorMsg)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;    
             {
-                Package p = gamePackages[i];
-                IResourceIndexEntry irie = p.Find(pred);
-                if (irie != null)
+
+                if (this.allInstances.ContainsKey(key))
                 {
-                    using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
+                    Package p = this.allInstances[key].Item2;
+                    IResourceIndexEntry irie = p.Find(pred);
+                    if (irie != null)
                     {
-                        if (notBaseGame[i]) SaveStream(irie, br, TroubleshootPackageBasic);
-                        try
+                        using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
                         {
-                            DMap dmap = new DMap(br);
-                            return dmap;
-                        }
-                        catch (Exception e)
-                        {
-                            errorMsg += "Can't read DMap " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
-                            return null;
+                            if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, br, TroubleshootPackageBasic);
+                            try
+                            {
+                                DMap dmap = new DMap(br);
+                                return dmap;
+                            }
+                            catch (Exception e)
+                            {
+                                errorMsg += "Can't read DMap " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
+                                return null;
+                            }
                         }
                     }
                 }
@@ -438,17 +452,22 @@ namespace TS4SimRipper
 
         private BOND FetchGameBOND(TGI tgi, ref string errorMsg)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
                     {
-                        if (notBaseGame[i]) SaveStream(irie, br, TroubleshootPackageBasic);
+                        if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, br, TroubleshootPackageBasic);
                         try
                         {
                             BOND bond = new BOND(br);
@@ -456,7 +475,7 @@ namespace TS4SimRipper
                         }
                         catch (Exception e)
                         {
-                            errorMsg += "Can't read BOND " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                            errorMsg += "Can't read BOND " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
                             return null;
                         }
                     }
@@ -468,30 +487,34 @@ namespace TS4SimRipper
 
         private CASP FetchGameCASP(TGI tgi, out string packageName, BodyType partType, int outfitNumber, ref string errorMsg, bool saveme)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) { packageName = ""; return null; }
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
                     {
-                        if (notBaseGame[i] && saveme) SaveStream(irie, br, TroubleshootPackageOutfit);
+                        if (this.allCCInstances.ContainsKey(key) && saveme) SaveStream(irie, br, TroubleshootPackageOutfit);
                         try
                         {
                             CASP casp = new CASP(br);
                             casp.tgi = new TGI(irie.ResourceType, irie.ResourceGroup, irie.Instance);
-                            casp.notBaseGame = notBaseGame[i];
-                            packageName = gamePackageNames[i];
+                            casp.notBaseGame = this.allCCInstances.ContainsKey(key);
+                            packageName = Path.GetFileName(allInstances[key].Item1);
                             return casp;
                         }
                         catch (Exception e)
                         {
-                            errorMsg += "Can't read " + partType.ToString() + " CASP " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
-                            packageName = gamePackageNames[i];
-                            if (notBaseGame[i] && !saveme) SaveStream(irie, br, TroubleshootPackageOutfit);
+                            errorMsg += "Can't read " + partType.ToString() + " CASP " + tgi.ToString() + ", Package: " + Path.GetFileName(allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
+                            packageName = Path.GetFileName(this.allInstances[key].Item1);
+                            if (this.allCCInstances.ContainsKey(key) && !saveme) SaveStream(irie, br, TroubleshootPackageOutfit);
                             return null;
                         }
                     }
@@ -503,17 +526,21 @@ namespace TS4SimRipper
         }
         private GEOM FetchGameGEOM(TGI tgi, string packname, int outfitNumber, ref string errorMsg)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
                     {
-                        if (notBaseGame[i]) SaveStream(irie, br, TroubleshootPackageOutfit);
+                        if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, br, TroubleshootPackageOutfit);
                         try
                         {
                             GEOM geom = new GEOM(br);
@@ -522,7 +549,7 @@ namespace TS4SimRipper
                         }
                         catch (Exception e)
                         {
-                            errorMsg += "Can't read GEOM " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                            errorMsg += "Can't read GEOM " + tgi.ToString() + ", Package: " + this.allCCInstances.ContainsKey(key) + " : " + e.Message + Environment.NewLine;
                             return null;
                         }
                     }
@@ -534,16 +561,18 @@ namespace TS4SimRipper
         private RegionMap FetchGameRMap(TGI tgi, string packname, int outfitNumber, ref string errorMsg)
         {
             if (tgi.Instance == 0ul) return null;
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+
             Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
                     {
-                        if (notBaseGame[i]) SaveStream(irie, br, TroubleshootPackageOutfit);
+                        if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, br, TroubleshootPackageOutfit);
                         try
                         {
                             RegionMap rmap = new RegionMap(br);
@@ -551,7 +580,7 @@ namespace TS4SimRipper
                         }
                         catch (Exception e)
                         {
-                            errorMsg += "Can't read RMap " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                            errorMsg += "Can't read RMap " + tgi.ToString() + ", Package: " + this.allCCInstances.ContainsKey(key) + " : " + e.Message + Environment.NewLine;
                             return null;
                         }
                     }
@@ -563,15 +592,17 @@ namespace TS4SimRipper
         private RLEResource FetchGameRLE(TGI tgi, int outfitNumber, ref string errorMsg)
         {
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     Stream s = p.GetResource(irie);
-                    if (notBaseGame[i]) SaveStream(irie, s, TroubleshootPackageOutfit);
+                    if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, s, TroubleshootPackageOutfit);
                     try
                     {
                         RLEResource rle = new RLEResource(1, s);
@@ -579,7 +610,7 @@ namespace TS4SimRipper
                     }
                     catch (Exception e)
                     {
-                        errorMsg += "Can't read RLE " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                        errorMsg += "Can't read RLE " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
                     }
                 }
             }
@@ -593,11 +624,15 @@ namespace TS4SimRipper
         private Bitmap FetchGameImageFromRLE(TGI tgi, bool isSpecular, int outfitNumber, ref string errorMsg, bool writeLog)
         {
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+            (uint ResourceType, uint ResourceGroup, ulong Instance) keyLrle = ((uint)ResourceTypes.LRLE, tgi.Group, tgi.Instance);
+
+
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
             Predicate<IResourceIndexEntry> predLrle = r => r.ResourceType == (uint)ResourceTypes.LRLE & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            if (this.allInstances.ContainsKey(key) || this.allInstances.ContainsKey(keyLrle))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 IResourceIndexEntry irieLrle = p.Find(predLrle);
                 if (irie != null || irieLrle != null)
@@ -616,7 +651,7 @@ namespace TS4SimRipper
                                 s = p.GetResource(irieLrle);
                             }
                         }
-                        if (notBaseGame[i]) SaveStream(irie, s, outfitNumber >= 0 ? TroubleshootPackageOutfit : TroubleshootPackageBasic);
+                        if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, s, outfitNumber >= 0 ? TroubleshootPackageOutfit : TroubleshootPackageBasic);
                         using (RLEResource rle = new RLEResource(1, s))
                         {
                             if (rle != null && rle.AsBytes.Length > 0)
@@ -646,7 +681,7 @@ namespace TS4SimRipper
                     {
                         if (isSpecular && writeLog)
                         {
-                            errorMsg += "Can't read RLES image " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                            errorMsg += "Can't read RLES image " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
                         }
                     }
                 }
@@ -663,17 +698,21 @@ namespace TS4SimRipper
         }
         private LRLE FetchGameLRLE(TGI tgi, int outfitNumber, ref string errorMsg)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
                     {
-                        if (notBaseGame[i]) SaveStream(irie, br, TroubleshootPackageOutfit);
+                        if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, br, TroubleshootPackageOutfit);
                         try
                         {
                             LRLE lrle = new LRLE(br);
@@ -681,7 +720,7 @@ namespace TS4SimRipper
                         }
                         catch (Exception e)
                         {
-                            errorMsg += "Can't read LRLE " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                            errorMsg += "Can't read LRLE " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
                         }
                     }
                 }
@@ -695,16 +734,19 @@ namespace TS4SimRipper
         }
         private Bitmap FetchGameImageFromLRLE(TGI tgi, int outfitNumber, ref string errorMsg, bool writeLog)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     Stream s = p.GetResource(irie);
-                    if (notBaseGame[i]) SaveStream(irie, s, outfitNumber >= 0 ? TroubleshootPackageOutfit : TroubleshootPackageBasic);
+                    if (allCCInstances.ContainsKey(key)) SaveStream(irie, s, outfitNumber >= 0 ? TroubleshootPackageOutfit : TroubleshootPackageBasic);
                     try
                     {
                         BinaryReader br = new BinaryReader(s);
@@ -735,7 +777,7 @@ namespace TS4SimRipper
                         }
                         catch (Exception e)
                         {
-                            if (writeLog) errorMsg += "Can't read LRLE image " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                            if (writeLog) errorMsg += "Can't read LRLE image " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
                         }
                     }
                 }
@@ -747,7 +789,7 @@ namespace TS4SimRipper
             //    IResourceIndexEntry irie = p.Find(pred2);
             //    if (irie != null)
             //    {
-            //        if (isCCPackage[i] && !currentCCPackages.Any(x => x.package == p)) { currentCCPackages.Add(new CCPackage(p, Path.GetFileName(gamePackageNames[i]), outfitNumber)); }
+            //        if (isCCPackage[i] && !currentCCPackages.Any(x => x.package == p)) { currentCCPackages.Add(new CCPackage(p, Path.GetFileName(Path.GetFileName(this.allInstances[key].Item1)), outfitNumber)); }
             //        Stream s = p.GetResource(irie);
             //        try
             //        {
@@ -769,7 +811,7 @@ namespace TS4SimRipper
             //        }
             //        catch
             //        {
-            //            errorMsg += "Can't read RLE image " + tgi.ToString() + ", Package: " + gamePackageNames[i] + Environment.NewLine;
+            //            errorMsg += "Can't read RLE image " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + Environment.NewLine;
             //        }
             //    }
             //}
@@ -797,16 +839,20 @@ namespace TS4SimRipper
 
         private DSTResource FetchGameDST(TGI tgi, int outfitNumber, ref string errorMsg)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     Stream s = p.GetResource(irie);
-                    if (notBaseGame[i]) SaveStream(irie, s, TroubleshootPackageOutfit);
+                    if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, s, TroubleshootPackageOutfit);
                     try
                     {
                         DSTResource dst = new DSTResource(1, s);
@@ -814,7 +860,7 @@ namespace TS4SimRipper
                     }
                     catch (Exception e)
                     {
-                        errorMsg += "Can't read DST " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                        errorMsg += "Can't read DST " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1)+ " : " + e.Message + Environment.NewLine;
                         return null;
                     }
                 }
@@ -824,16 +870,20 @@ namespace TS4SimRipper
         }
         private Bitmap FetchGameImageFromDST(TGI tgi, int outfitNumber, ref string errorMsg)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     Stream s = p.GetResource(irie);
-                    if (notBaseGame[i]) SaveStream(irie, s, TroubleshootPackageOutfit);
+                    if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, s, TroubleshootPackageOutfit);
                     try
                     {
                         using (DSTResource dst = new DSTResource(1, s))
@@ -850,7 +900,7 @@ namespace TS4SimRipper
                     }
                     catch (Exception e)
                     {
-                        errorMsg += "Can't read DST image " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                        errorMsg += "Can't read DST image " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
                         return null;
                     }
                 }
@@ -861,16 +911,19 @@ namespace TS4SimRipper
 
         private DdsFile FetchGameDDS(TGI tgi, int outfitNumber, ref string errorMsg)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     Stream s = p.GetResource(irie);
-                    if (notBaseGame[i]) SaveStream(irie, s, TroubleshootPackageOutfit);
+                    if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, s, TroubleshootPackageOutfit);
                     try
                     {
                         DdsFile dds = new DdsFile();
@@ -879,7 +932,7 @@ namespace TS4SimRipper
                     }
                     catch (Exception e)
                     {
-                        errorMsg += "Can't read DDS " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                        errorMsg += "Can't read DDS " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1)  + " : " + e.Message + Environment.NewLine;
                         return null;
                     }
                 }
@@ -889,16 +942,21 @@ namespace TS4SimRipper
         }
         private Bitmap FetchGameImageFromDDS(TGI tgi, int outfitNumber, ref string errorMsg, bool writeLog)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
+
                 if (irie != null)
                 {
                     Stream s = p.GetResource(irie);
-                    if (notBaseGame[i]) SaveStream(irie, s, outfitNumber >= 0 ? TroubleshootPackageOutfit : TroubleshootPackageBasic);
+                    if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, s, outfitNumber >= 0 ? TroubleshootPackageOutfit : TroubleshootPackageBasic);
                     using (DdsFile dds = new DdsFile())
                     {
                         try
@@ -912,7 +970,7 @@ namespace TS4SimRipper
                         catch (Exception e)
                         {
                             if (writeLog)
-                                errorMsg += "Can't read DDS image " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                                errorMsg += "Can't read DDS image " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
                             return null;
                         }
                     }
@@ -923,27 +981,30 @@ namespace TS4SimRipper
         }
         private TONE FetchGameTONE(TGI tgi, out string packageName, ref string errorMsg)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) { packageName = ""; return null; }
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
-            {
-                Package p = gamePackages[i];
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
+            { 
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
                     {
-                        if (notBaseGame[i]) SaveStream(irie, br, TroubleshootPackageBasic);
+                        if (this.allCCInstances.ContainsKey(key)) SaveStream(irie, br, TroubleshootPackageBasic);
                         try
                         {
                             TONE tone = new TONE(br);
-                            packageName = gamePackageNames[i];
+                            packageName = Path.GetFileName(allInstances[key].Item1);
                             return tone;
                         }
                         catch (Exception e)
                         {
-                            errorMsg += "Can't read TONE " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
-                            packageName = gamePackageNames[i];
+                            errorMsg += "Can't read TONE " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
+                            packageName = Path.GetFileName(allInstances[key].Item1);
                             return null;
                         }
                     }
@@ -955,17 +1016,21 @@ namespace TS4SimRipper
         }
         private PeltLayer FetchGamePeltLayer(TGI tgi, ref string errorMsg)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
                     {
-                        if (notBaseGame[i]) SaveStream(irie, br, TroubleshootPackageBasic);
+                        if(this.allCCInstances.ContainsKey(key)) SaveStream(irie, br, TroubleshootPackageBasic);
                         try
                         {
                             PeltLayer pelt = new PeltLayer(br);
@@ -973,7 +1038,7 @@ namespace TS4SimRipper
                         }
                         catch (Exception e)
                         {
-                            errorMsg += "Can't read Pelt " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                            errorMsg += "Can't read Pelt " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
                             return null;
                         }
                     }
@@ -984,17 +1049,22 @@ namespace TS4SimRipper
         }
         private RIG FetchGameRig(TGI tgi, ref string errorMsg)
         {
+            string err = "";
+
             if (tgi.Instance == 0ul) return null;
-            Predicate<IResourceIndexEntry> pred = r => r.ResourceType == tgi.Type & r.Instance == tgi.Instance;
-            for (int i = 0; i < gamePackages.Length; i++)
+            (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
+
+            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+            if (this.allInstances.ContainsKey(key))
             {
-                Package p = gamePackages[i];
+                Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
                 {
                     using (BinaryReader br = new BinaryReader(p.GetResource(irie)))
                     {
-                        if (notBaseGame[i]) SaveStream(irie, br, TroubleshootPackageBasic);
+                        if (this.allCCInstances.ContainsKey(key))
+                            SaveStream(irie, br, TroubleshootPackageBasic);
                         try
                         {
                             RIG rig = new RIG(br);
@@ -1002,14 +1072,16 @@ namespace TS4SimRipper
                         }
                         catch (Exception e)
                         {
-                            errorMsg += "Can't read Rig " + tgi.ToString() + ", Package: " + gamePackageNames[i] + " : " + e.Message + Environment.NewLine;
+                            errorMsg += "Can't read Rig " + tgi.ToString() + ", Package: " + Path.GetFileName(this.allInstances[key].Item1) + " : " + e.Message + Environment.NewLine;
                             return null;
                         }
                     }
+
                 }
             }
             errorMsg += "Can't find Rig " + tgi.ToString() + Environment.NewLine;
             return null;
         }
+        
     }
 }
