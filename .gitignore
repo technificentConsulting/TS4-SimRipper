@@ -223,3 +223,11 @@ project.lock.json
 #####
 # End of core ignore list, below put you custom 'per project' settings (patterns or path)
 #####
+DDSPanel.dll
+Ookii.Dialogs.dll
+protobuf-net.dll
+s4pi.ImageResource.dll
+s4pi.Package.dll
+s4pi.Interfaces.dll
+s4pi.Settings.dll
+System.Custom.dll
