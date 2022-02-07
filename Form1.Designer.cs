@@ -55,6 +55,11 @@
             this.StandardSize_radioButton = new System.Windows.Forms.RadioButton();
             this.Skinblend37_radioButton = new System.Windows.Forms.RadioButton();
             this.SaveMakeup_button = new System.Windows.Forms.Button();
+            this.SaveSkin_button = new System.Windows.Forms.Button();
+            this.SaveClothing_button = new System.Windows.Forms.Button();
+            this.SaveNormals_button = new System.Windows.Forms.Button();
+            this.NormalConvert_checkBox = new System.Windows.Forms.CheckBox();
+            this.SaveEmission_button = new System.Windows.Forms.Button();
             this.SaveTextures_button = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.SkinState_comboBox = new System.Windows.Forms.ComboBox();
@@ -77,22 +82,20 @@
             this.OverlaySort_comboBox = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
-            this.SaveSkin_button = new System.Windows.Forms.Button();
-            this.SaveClothing_button = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
             this.SortBy_comboBox = new System.Windows.Forms.ComboBox();
             this.GameName = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
             this.morphPreview1 = new TS4SimRipper.MorphPreview();
-            this.SaveNormals_button = new System.Windows.Forms.Button();
-            this.NormalConvert_checkBox = new System.Windows.Forms.CheckBox();
-            this.SaveEmission_button = new System.Windows.Forms.Button();
+            this.levelOfDetailUpDown = new System.Windows.Forms.NumericUpDown();
+            this.label13 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Pregnancy_trackBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.BoneSize_numericUpDown)).BeginInit();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.levelOfDetailUpDown)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -126,9 +129,8 @@
             // 
             // sims_listBox
             // 
-            this.sims_listBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.sims_listBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.sims_listBox.FormattingEnabled = true;
             this.sims_listBox.Location = new System.Drawing.Point(9, 247);
             this.sims_listBox.Name = "sims_listBox";
@@ -346,7 +348,8 @@
             // 
             // SaveMakeup_button
             // 
-            this.SaveMakeup_button.Location = new System.Drawing.Point(776, 263);
+            this.SaveMakeup_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SaveMakeup_button.Location = new System.Drawing.Point(761, 263);
             this.SaveMakeup_button.Name = "SaveMakeup_button";
             this.SaveMakeup_button.Size = new System.Drawing.Size(65, 30);
             this.SaveMakeup_button.TabIndex = 63;
@@ -354,6 +357,68 @@
             this.toolTip1.SetToolTip(this.SaveMakeup_button, "Tattoos, skin details, eyebrows, eye color, makeup texture");
             this.SaveMakeup_button.UseVisualStyleBackColor = true;
             this.SaveMakeup_button.Click += new System.EventHandler(this.SaveMakeup_button_Click);
+            // 
+            // SaveSkin_button
+            // 
+            this.SaveSkin_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SaveSkin_button.Location = new System.Drawing.Point(917, 227);
+            this.SaveSkin_button.Name = "SaveSkin_button";
+            this.SaveSkin_button.Size = new System.Drawing.Size(65, 30);
+            this.SaveSkin_button.TabIndex = 54;
+            this.SaveSkin_button.Text = "Skin";
+            this.toolTip1.SetToolTip(this.SaveSkin_button, "Skin texture only");
+            this.SaveSkin_button.UseVisualStyleBackColor = true;
+            this.SaveSkin_button.Click += new System.EventHandler(this.SaveSkin_button_Click);
+            // 
+            // SaveClothing_button
+            // 
+            this.SaveClothing_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SaveClothing_button.Location = new System.Drawing.Point(832, 263);
+            this.SaveClothing_button.Name = "SaveClothing_button";
+            this.SaveClothing_button.Size = new System.Drawing.Size(65, 30);
+            this.SaveClothing_button.TabIndex = 55;
+            this.SaveClothing_button.Text = "Clothing";
+            this.toolTip1.SetToolTip(this.SaveClothing_button, "Clothing, hair, accessories, nail polish texture");
+            this.SaveClothing_button.UseVisualStyleBackColor = true;
+            this.SaveClothing_button.Click += new System.EventHandler(this.SaveClothing_button_Click);
+            // 
+            // SaveNormals_button
+            // 
+            this.SaveNormals_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SaveNormals_button.Location = new System.Drawing.Point(690, 263);
+            this.SaveNormals_button.Name = "SaveNormals_button";
+            this.SaveNormals_button.Size = new System.Drawing.Size(65, 30);
+            this.SaveNormals_button.TabIndex = 60;
+            this.SaveNormals_button.Text = "Normals";
+            this.toolTip1.SetToolTip(this.SaveNormals_button, "Normal / Bump map");
+            this.SaveNormals_button.UseVisualStyleBackColor = true;
+            this.SaveNormals_button.Click += new System.EventHandler(this.SaveNormals_button_Click);
+            // 
+            // NormalConvert_checkBox
+            // 
+            this.NormalConvert_checkBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.NormalConvert_checkBox.AutoSize = true;
+            this.NormalConvert_checkBox.Checked = true;
+            this.NormalConvert_checkBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.NormalConvert_checkBox.Location = new System.Drawing.Point(870, 309);
+            this.NormalConvert_checkBox.Name = "NormalConvert_checkBox";
+            this.NormalConvert_checkBox.Size = new System.Drawing.Size(107, 17);
+            this.NormalConvert_checkBox.TabIndex = 61;
+            this.NormalConvert_checkBox.Text = "Convert to RGB?";
+            this.toolTip1.SetToolTip(this.NormalConvert_checkBox, "Convert normals to RGB format");
+            this.NormalConvert_checkBox.UseVisualStyleBackColor = true;
+            // 
+            // SaveEmission_button
+            // 
+            this.SaveEmission_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SaveEmission_button.Location = new System.Drawing.Point(903, 263);
+            this.SaveEmission_button.Name = "SaveEmission_button";
+            this.SaveEmission_button.Size = new System.Drawing.Size(65, 30);
+            this.SaveEmission_button.TabIndex = 62;
+            this.SaveEmission_button.Text = "Emisson";
+            this.toolTip1.SetToolTip(this.SaveEmission_button, "Emission / Glow map");
+            this.SaveEmission_button.UseVisualStyleBackColor = true;
+            this.SaveEmission_button.Click += new System.EventHandler(this.SaveEmission_button_Click);
             // 
             // SaveTextures_button
             // 
@@ -392,8 +457,6 @@
             // 
             // SimFilter_checkedListBox
             // 
-            this.SimFilter_checkedListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.SimFilter_checkedListBox.CheckOnClick = true;
             this.SimFilter_checkedListBox.ColumnWidth = 100;
             this.SimFilter_checkedListBox.FormattingEnabled = true;
@@ -637,30 +700,6 @@
             this.label10.TabIndex = 53;
             this.label10.Text = "Save Textures:";
             // 
-            // SaveSkin_button
-            // 
-            this.SaveSkin_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.SaveSkin_button.Location = new System.Drawing.Point(917, 227);
-            this.SaveSkin_button.Name = "SaveSkin_button";
-            this.SaveSkin_button.Size = new System.Drawing.Size(65, 30);
-            this.SaveSkin_button.TabIndex = 54;
-            this.SaveSkin_button.Text = "Skin";
-            this.toolTip1.SetToolTip(this.SaveSkin_button, "Skin texture only");
-            this.SaveSkin_button.UseVisualStyleBackColor = true;
-            this.SaveSkin_button.Click += new System.EventHandler(this.SaveSkin_button_Click);
-            // 
-            // SaveClothing_button
-            // 
-            this.SaveClothing_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.SaveClothing_button.Location = new System.Drawing.Point(846, 263);
-            this.SaveClothing_button.Name = "SaveClothing_button";
-            this.SaveClothing_button.Size = new System.Drawing.Size(65, 30);
-            this.SaveClothing_button.TabIndex = 55;
-            this.SaveClothing_button.Text = "Clothing";
-            this.toolTip1.SetToolTip(this.SaveClothing_button, "Clothing, hair, accessories, nail polish texture");
-            this.SaveClothing_button.UseVisualStyleBackColor = true;
-            this.SaveClothing_button.Click += new System.EventHandler(this.SaveClothing_button_Click);
-            // 
             // label11
             // 
             this.label11.AutoSize = true;
@@ -672,8 +711,6 @@
             // 
             // SortBy_comboBox
             // 
-            this.SortBy_comboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.SortBy_comboBox.FormattingEnabled = true;
             this.SortBy_comboBox.Items.AddRange(new object[] {
             "Last name",
@@ -703,56 +740,49 @@
             // 
             // elementHost1
             // 
-            this.elementHost1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.elementHost1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.elementHost1.AutoSize = true;
             this.elementHost1.Location = new System.Drawing.Point(237, 83);
             this.elementHost1.Name = "elementHost1";
-            this.elementHost1.Size = new System.Drawing.Size(447, 521);
+            this.elementHost1.Size = new System.Drawing.Size(440, 512);
             this.elementHost1.TabIndex = 17;
             this.elementHost1.Text = "elementHost1";
+            this.elementHost1.ChildChanged += new System.EventHandler<System.Windows.Forms.Integration.ChildChangedEventArgs>(this.elementHost1_ChildChanged);
             this.elementHost1.Child = this.morphPreview1;
             // 
-            // SaveNormals_button
+            // levelOfDetailUpDown
             // 
-            this.SaveNormals_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.SaveNormals_button.Location = new System.Drawing.Point(776, 299);
-            this.SaveNormals_button.Name = "SaveNormals_button";
-            this.SaveNormals_button.Size = new System.Drawing.Size(65, 30);
-            this.SaveNormals_button.TabIndex = 60;
-            this.SaveNormals_button.Text = "Normals";
-            this.toolTip1.SetToolTip(this.SaveNormals_button, "Normal / Bump map");
-            this.SaveNormals_button.UseVisualStyleBackColor = true;
-            this.SaveNormals_button.Click += new System.EventHandler(this.SaveNormals_button_Click);
+            this.levelOfDetailUpDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.levelOfDetailUpDown.Location = new System.Drawing.Point(761, 309);
+            this.levelOfDetailUpDown.Maximum = new decimal(new int[] {
+            3,
+            0,
+            0,
+            0});
+            this.levelOfDetailUpDown.Name = "levelOfDetailUpDown";
+            this.levelOfDetailUpDown.Size = new System.Drawing.Size(36, 20);
+            this.levelOfDetailUpDown.TabIndex = 64;
+            this.levelOfDetailUpDown.ValueChanged += new System.EventHandler(this.levelOfDetailUpDown_ValueChanged);
             // 
-            // NormalConvert_checkBox
+            // label13
             // 
-            this.NormalConvert_checkBox.AutoSize = true;
-            this.NormalConvert_checkBox.Checked = true;
-            this.NormalConvert_checkBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.NormalConvert_checkBox.Location = new System.Drawing.Point(845, 307);
-            this.NormalConvert_checkBox.Name = "NormalConvert_checkBox";
-            this.NormalConvert_checkBox.Size = new System.Drawing.Size(107, 17);
-            this.NormalConvert_checkBox.TabIndex = 61;
-            this.NormalConvert_checkBox.Text = "Convert to RGB?";
-            this.toolTip1.SetToolTip(this.NormalConvert_checkBox, "Convert normals to RGB format");
-            this.NormalConvert_checkBox.UseVisualStyleBackColor = true;
-            // 
-            // SaveEmission_button
-            // 
-            this.SaveEmission_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.SaveEmission_button.Location = new System.Drawing.Point(917, 263);
-            this.SaveEmission_button.Name = "SaveEmission_button";
-            this.SaveEmission_button.Size = new System.Drawing.Size(65, 30);
-            this.SaveEmission_button.TabIndex = 62;
-            this.SaveEmission_button.Text = "Emisson";
-            this.toolTip1.SetToolTip(this.SaveEmission_button, "Emission / Glow map");
-            this.SaveEmission_button.UseVisualStyleBackColor = true;
-            this.SaveEmission_button.Click += new System.EventHandler(this.SaveEmission_button_Click);
+            this.label13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(690, 313);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(73, 13);
+            this.label13.TabIndex = 65;
+            this.label13.Text = "Level of detail";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(994, 616);
+            this.Controls.Add(this.label13);
+            this.Controls.Add(this.levelOfDetailUpDown);
             this.Controls.Add(this.SaveMakeup_button);
             this.Controls.Add(this.SaveEmission_button);
             this.Controls.Add(this.NormalConvert_checkBox);
@@ -814,6 +844,7 @@
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.levelOfDetailUpDown)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -881,6 +912,8 @@
         private System.Windows.Forms.CheckBox NormalConvert_checkBox;
         private System.Windows.Forms.Button SaveEmission_button;
         private System.Windows.Forms.Button SaveMakeup_button;
+        private System.Windows.Forms.NumericUpDown levelOfDetailUpDown;
+        private System.Windows.Forms.Label label13;
     }
 }
 

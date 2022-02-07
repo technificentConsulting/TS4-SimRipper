@@ -349,11 +349,11 @@ namespace TS4SimRipper
         //    return g;
         //}
 
-        private void GetCurrentModel()
+        private void GetCurrentModel(int desiredLevelOfDetail)
         {
-            GetCurrentModel(false);
+            GetCurrentModel(false, desiredLevelOfDetail);
         }
-        private void GetCurrentModel(bool skinOnly)
+        private void GetCurrentModel(bool skinOnly, int desiredLevelOfDetail)
         {
             string fullInfo = "";
             TroubleshootPackageOutfit = (Package)Package.NewPackage(1);
@@ -462,7 +462,7 @@ namespace TS4SimRipper
                     if (outfit[i].BodyTypeNumeric < 64 && (excludeFlags & test) > 0 ||
                         outfit[i].BodyTypeNumeric >= 64 && (excludeFlags2 & test) > 0) continue;
 
-                    TGI[] tgis = outfit[i].MeshParts(0);
+                    TGI[] tgis = outfit[i].MeshParts(desiredLevelOfDetail);
                     if (tgis.Length == 0) tgis = outfit[i].MeshParts(1);
                     TGI bumpTGI = null;
                     TGI emissionTGI = null;

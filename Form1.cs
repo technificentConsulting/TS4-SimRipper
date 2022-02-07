@@ -97,7 +97,7 @@ namespace TS4SimRipper
 			
 			try
 			{
-            CASTuning = new CASModifierTuning(gamePackages, gamePackageNames, notBaseGame, this, allInstances, allCCInstances);
+            CASTuning = new CASModifierTuning(gamePackages, gamePackageNames, notBaseGame, this, allMaxisInstances, allCCInstances);
 			}
 
             catch (Exception e)
@@ -123,6 +123,8 @@ namespace TS4SimRipper
             OverlaySort_comboBox.SelectedIndexChanged -= OverlaySort_comboBox_SelectedIndexChanged;
             OverlaySort_comboBox.SelectedIndex = Properties.Settings.Default.OverlaySortOrder;
             OverlaySort_comboBox.SelectedIndexChanged += OverlaySort_comboBox_SelectedIndexChanged;
+            levelOfDetailUpDown.Value = Properties.Settings.Default.LevelOfDetail;
+
             if (Properties.Settings.Default.SkinBlendIndex == 0) SkinBlend1_radioButton.Checked = true;
             else if (Properties.Settings.Default.SkinBlendIndex == 1) Skinblend37_radioButton.Checked = true;
             else if (Properties.Settings.Default.SkinBlendIndex == 2) SkinBlend2_radioButton.Checked = true;
@@ -369,7 +371,7 @@ namespace TS4SimRipper
                 Pregnancy_trackBar.Enabled = false;
             }
 
-            DisplaySim(sim, currentOccult);
+            DisplaySim(sim, currentOccult, (int)levelOfDetailUpDown.Value);
         }
 
         //private class CCPackage
@@ -386,7 +388,7 @@ namespace TS4SimRipper
         //    }
         //}
 
-        private void DisplaySim(TS4SaveGame.SimData sim, SimOccult occultState)
+        private void DisplaySim(TS4SaveGame.SimData sim, SimOccult occultState, int desiredLevelOfDetail)
         {
             bool debug = false;
             TroubleshootPackageBasic = (Package)Package.NewPackage(0);
@@ -927,7 +929,7 @@ namespace TS4SimRipper
 
             if (debug) errorList += "DisplaySim loaded info listing" + Environment.NewLine;
 
-            GetCurrentModel();
+            GetCurrentModel((int)levelOfDetailUpDown.Value);
             Working_label.Visible = false;
             //// info += "Traits: ";
             //// foreach (ulong trait in sim.attributes.trait_tracker.trait_ids) { info += ((TS4Traits)trait).ToString() + Environment.NewLine; };
@@ -1291,7 +1293,7 @@ namespace TS4SimRipper
         private void Occults_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             TS4SaveGame.SimData sim = ((SimListing)sims_listBox.SelectedItem).sim;
-            DisplaySim(sim, (SimOccult)Occults_comboBox.SelectedItem);
+            DisplaySim(sim, (SimOccult)Occults_comboBox.SelectedItem, (int)levelOfDetailUpDown.Value);
         }
 
         private void Outfits_comboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -1300,7 +1302,7 @@ namespace TS4SimRipper
             Working_label.Visible = true;
             Working_label.Refresh();
             morphPreview1.Stop_Mesh();
-            GetCurrentModel();
+            GetCurrentModel((int)levelOfDetailUpDown.Value);
             morphPreview1.Start_Mesh(CurrentModel, GlassModel, currentTexture, currentClothingSpecular,
                 currentGlassTexture, currentGlassSpecular, false, SeparateMeshes_comboBox.SelectedIndex == 2);
             Working_label.Visible = false;
@@ -1329,7 +1331,7 @@ namespace TS4SimRipper
             Working_label.Visible = true;
             Working_label.Refresh();
             morphPreview1.Stop_Mesh();
-            GetCurrentModel(true);
+            GetCurrentModel(true, (int)levelOfDetailUpDown.Value);
             morphPreview1.Start_Mesh(CurrentModel, GlassModel, currentTexture, currentClothingSpecular, 
                 currentGlassTexture, currentGlassSpecular, false, SeparateMeshes_comboBox.SelectedIndex == 2);
             Working_label.Visible = false;
@@ -1341,7 +1343,7 @@ namespace TS4SimRipper
             Working_label.Visible = true;
             Working_label.Refresh();
             morphPreview1.Stop_Mesh();
-            GetCurrentModel(true);
+            GetCurrentModel(true, (int)levelOfDetailUpDown.Value);
             morphPreview1.Start_Mesh(CurrentModel, GlassModel, currentTexture, currentClothingSpecular, 
                 currentGlassTexture, currentGlassSpecular, false, SeparateMeshes_comboBox.SelectedIndex == 2);
             Working_label.Visible = false;
@@ -1353,7 +1355,7 @@ namespace TS4SimRipper
             Working_label.Visible = true;
             Working_label.Refresh();
             morphPreview1.Stop_Mesh();
-            GetCurrentModel(true);
+            GetCurrentModel(true, (int)levelOfDetailUpDown.Value);
             morphPreview1.Start_Mesh(CurrentModel, GlassModel, currentTexture, currentClothingSpecular,
                 currentGlassTexture, currentGlassSpecular, false, SeparateMeshes_comboBox.SelectedIndex == 2);
             Working_label.Visible = false;
@@ -1365,7 +1367,7 @@ namespace TS4SimRipper
             Working_label.Visible = true;
             Working_label.Refresh();
             morphPreview1.Stop_Mesh();
-            GetCurrentModel(true);
+            GetCurrentModel(true, (int)levelOfDetailUpDown.Value);
             morphPreview1.Start_Mesh(CurrentModel, GlassModel, currentTexture, currentClothingSpecular,
                 currentGlassTexture, currentGlassSpecular, false, SeparateMeshes_comboBox.SelectedIndex == 2);
             Working_label.Visible = false;
@@ -1377,7 +1379,7 @@ namespace TS4SimRipper
             Working_label.Visible = true;
             Working_label.Refresh();
             morphPreview1.Stop_Mesh();
-            GetCurrentModel(false);
+            GetCurrentModel(false, (int)levelOfDetailUpDown.Value);
             morphPreview1.Start_Mesh(CurrentModel, GlassModel, currentTexture, currentClothingSpecular,
                 currentGlassTexture, currentGlassSpecular, false, SeparateMeshes_comboBox.SelectedIndex == 2);
             Working_label.Visible = false;
@@ -1394,7 +1396,7 @@ namespace TS4SimRipper
             Working_label.Visible = true;
             Working_label.Refresh();
             morphPreview1.Stop_Mesh();
-            GetCurrentModel(false);
+            GetCurrentModel(false, (int)levelOfDetailUpDown.Value);
             morphPreview1.Start_Mesh(CurrentModel, GlassModel, currentTexture, currentClothingSpecular, 
                 currentGlassTexture, currentGlassSpecular, false, SeparateMeshes_comboBox.SelectedIndex == 2);
             Working_label.Visible = false;
@@ -1402,6 +1404,8 @@ namespace TS4SimRipper
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            Properties.Settings.Default.LevelOfDetail = (int)levelOfDetailUpDown.Value;
+
             Properties.Settings.Default.BlenderBoneLength = BoneSize_numericUpDown.Value;
             Properties.Settings.Default.BlenderClean = CleanDAE_checkBox.Checked;
             Properties.Settings.Default.SeparateMeshesIndex = SeparateMeshes_comboBox.SelectedIndex;
@@ -1414,6 +1418,36 @@ namespace TS4SimRipper
             else if (SkinBlend3_radioButton.Checked == true) Properties.Settings.Default.SkinBlendIndex = 3;
             Properties.Settings.Default.ConvertBump = NormalConvert_checkBox.Checked;
             Properties.Settings.Default.Save();
+        }
+
+        private void levelOfDetailUpDown_ValueChanged(object sender, EventArgs e)
+        {
+            if(sims_listBox.SelectedItem != null)
+            {
+                TS4SaveGame.SimData sim = ((SimListing)sims_listBox.SelectedItem).sim;
+                currentOccult = SimOccult.Human;
+                Occults_comboBox.SelectedIndexChanged -= Occults_comboBox_SelectedIndexChanged;
+                Occults_comboBox.Items.Clear();
+                Occults_comboBox.Refresh();
+                if (sim.attributes.occult_tracker != null && sim.attributes.occult_tracker.occult_sim_infos != null)
+                {
+
+                    for (int i = 0; i < sim.attributes.occult_tracker.occult_sim_infos.Length; i++)
+                    {
+                        TS4SaveGame.OccultSimData occult = sim.attributes.occult_tracker.occult_sim_infos[i];
+                        SimOccult occultType = (SimOccult)occult.occult_type;
+                        currentOccult = occultType;
+                    }
+                }
+                DisplaySim(sim, currentOccult, (int)levelOfDetailUpDown.Value);
+            }
+
+
+        }
+
+        private void elementHost1_ChildChanged(object sender, System.Windows.Forms.Integration.ChildChangedEventArgs e)
+        {
+
         }
     }
 }

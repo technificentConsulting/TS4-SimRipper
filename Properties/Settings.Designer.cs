@@ -178,5 +178,17 @@ namespace TS4SimRipper.Properties {
                 this["ConvertBump"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LevelOfDetail {
+            get {
+                return ((int)(this["LevelOfDetail"]));
+            }
+            set {
+                this["LevelOfDetail"] = value;
+            }
+        }
     }
 }

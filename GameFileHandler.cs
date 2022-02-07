@@ -23,8 +23,9 @@ namespace TS4SimRipper
         public Package TroubleshootPackageTuning = (Package)Package.NewPackage(0);
         Package TroubleshootPackageBasic = (Package)Package.NewPackage(0);
         Package TroubleshootPackageOutfit = (Package)Package.NewPackage(0);
-        public Dictionary<(uint, uint, ulong),  string> allInstances = new Dictionary<(uint, uint, ulong), string>();
+        public Dictionary<(uint, uint, ulong),  string> allMaxisInstances = new Dictionary<(uint, uint, ulong), string>();
         public Dictionary<(uint, uint, ulong), string> allCCInstances = new Dictionary<(uint, uint, ulong), string>();
+        public Dictionary<(uint, uint, ulong), string> allInstances = new Dictionary<(uint, uint, ulong), string>();
 
 
         private bool DetectFilePaths()
@@ -188,6 +189,11 @@ namespace TS4SimRipper
 
                                 (uint ResourceType, uint ResourceGroup, ulong Instance) key = (indexEntry.ResourceType, indexEntry.ResourceGroup, indexEntry.Instance);
 
+                                if (!this.allMaxisInstances.ContainsKey(key))
+                                {
+                                    this.allMaxisInstances.Add(key, paths[i]);
+                                }
+
                                 if (!this.allInstances.ContainsKey(key))
                                 {
                                     this.allInstances.Add(key, paths[i]);
@@ -249,6 +255,10 @@ namespace TS4SimRipper
                                     {
                                         this.allCCInstances.Add(key, paths[j]);
 
+                                    }
+                                    if (!this.allInstances.ContainsKey(key))
+                                    {
+                                        this.allInstances.Add(key, paths[i]);
                                     }
                                 }
                             }
