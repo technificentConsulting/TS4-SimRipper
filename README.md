@@ -3,6 +3,8 @@
 
 Many thanks to her for allowing me to continue this project!
 
+### NEW SUPPORT PAGE WILL BE UP SOON, Please wait a little longer.
+
 Original Description, modified to remove older release notes, is as follows.
 
 This is a tool to read TS4 save files, list the sims, and create a mesh of the sim with all the appropriate morphs applied, hopefully duplicating the appearance of the sim in the game. The mesh can then be saved in a choice of mesh formats. The composited diffuse and specular textures are also saved. Optionally a composited bumpmap and emissionmap can be saved, but these are experimental and may not be useful.
