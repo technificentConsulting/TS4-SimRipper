@@ -841,7 +841,11 @@ namespace TS4SimRipper
                         // 4 = special makeup?             
                         if (imageStack[i].image != null && imageStack[i].compositionMethod != 3)
                         {
-                            ShiftTexture((Bitmap)imageStack[i].image, imageStack[i].HueShift, imageStack[i].SaturationShift, imageStack[i].BrightnessShift);
+                            if(Math.Abs(imageStack[i].HueShift) > 0.001 || Math.Abs(imageStack[i].SaturationShift) > 0.001 || Math.Abs(imageStack[i].BrightnessShift) > 0.001)
+                            {
+                                ShiftTexture((Bitmap)imageStack[i].image, imageStack[i].HueShift, imageStack[i].SaturationShift, imageStack[i].BrightnessShift);
+
+                            }
                             if (imageStack[i].compositionMethod == 2)
                             {
                                 alphaMatrix[3][3] = currentTONE.SkinSets[0].MakeupOpacity * imageStack[i].Opacity;
