@@ -1,13 +1,15 @@
-# SimRipper
+# TS4 SimRipper
 ### A fork of CmarNYC's SimRipper that aims to improve speed and more.
 
 Many thanks to her for allowing me to continue this project!
 
-### NEW SUPPORT PAGE WILL BE UP SOON, Please wait a little longer.
+# Get support here on [Discord!](https://discord.gg/E6VJF7XgbA)
 
 Original Description, modified to remove older release notes, is as follows.
 
 This is a tool to read TS4 save files, list the sims, and create a mesh of the sim with all the appropriate morphs applied, hopefully duplicating the appearance of the sim in the game. The mesh can then be saved in a choice of mesh formats. The composited diffuse and specular textures are also saved. Optionally a composited bumpmap and emissionmap can be saved, but these are experimental and may not be useful.
+
+# Tl;dr It's a tool for extracting Sims 4 sims for use in other 3d programs like Blender.
 
 Meshes exported as Collada DAE can be imported into Blender (or other 3D editors that support DAE) with rig and bone assignments.
 
