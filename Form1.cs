@@ -928,6 +928,7 @@ namespace TS4SimRipper
             simDesc = info + Environment.NewLine + morphInfo + Environment.NewLine;
 
             if (debug) errorList += "DisplaySim loaded info listing" + Environment.NewLine;
+            Console.WriteLine("Sim changed");
 
             GetCurrentModel((int)levelOfDetailUpDown.Value);
             Working_label.Visible = false;
@@ -1298,6 +1299,8 @@ namespace TS4SimRipper
 
         private void Outfits_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            Console.WriteLine("Outfit changed");
+
             outfitIndex = Outfits_comboBox.SelectedIndex;
             Working_label.Visible = true;
             Working_label.Refresh();
@@ -1326,6 +1329,7 @@ namespace TS4SimRipper
 
         private void SkinState_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            Console.WriteLine("Skin changed");
             if (BaseModel == null) return;
             currentSkinSet = SkinState_comboBox.SelectedIndex;
             Working_label.Visible = true;
@@ -1339,6 +1343,8 @@ namespace TS4SimRipper
 
         private void TanLines_checkBox_CheckedChanged(object sender, EventArgs e)
         {
+            Console.WriteLine("Tan lines changed");
+
             if (BaseModel == null) return;
             Working_label.Visible = true;
             Working_label.Refresh();
@@ -1351,6 +1357,8 @@ namespace TS4SimRipper
 
         private void SkinBlend_radioButton_CheckedChanged(object sender, EventArgs e)
         {
+            Console.WriteLine("Skin blend changed");
+
             if (BaseModel == null) return;
             Working_label.Visible = true;
             Working_label.Refresh();
@@ -1363,6 +1371,8 @@ namespace TS4SimRipper
 
         private void SkinOverlay_checkBox_CheckedChanged(object sender, EventArgs e)
         {
+            Console.WriteLine("Skin overlay changed");
+
             if (BaseModel == null) return;
             Working_label.Visible = true;
             Working_label.Refresh();
@@ -1375,6 +1385,8 @@ namespace TS4SimRipper
 
         private void OverlaySort_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            Console.WriteLine("OverlaySort changed");
+
             if (BaseModel == null) return;
             Working_label.Visible = true;
             Working_label.Refresh();
@@ -1392,6 +1404,8 @@ namespace TS4SimRipper
 
         private void HQSize_radioButton_CheckedChanged(object sender, EventArgs e)
         {
+            Console.WriteLine("HQ size changed");
+
             if (BaseModel == null) return;
             Working_label.Visible = true;
             Working_label.Refresh();

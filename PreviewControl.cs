@@ -632,159 +632,14 @@ namespace TS4SimRipper
                     }
                 }
 
-                if (BaseModel != null && currentSpecies == Species.Human && currentAge > AgeGender.Child)
-                {
-                    //if (partGenders[(int)BodyType.Top] == AgeGender.Female && partGenders[(int)BodyType.Bottom] == AgeGender.Male) BaseModel[(int)BodyType.Top].FillWaistGap(BaseModel[(int)BodyType.Bottom]);
-                    if (partGenders[(int)BodyType.Top] == AgeGender.Female && partGenders[(int)BodyType.Bottom] == AgeGender.Male)
-                    {
-                        BaseModel[(int)BodyType.Top].AutoSeamStitches(Species.Human, AgeGender.Adult, AgeGender.Female, 0);
-                        BaseModel[(int)BodyType.Bottom].AutoSeamStitches(Species.Human, AgeGender.Adult, AgeGender.Male, 0);
-                        Stream s = new MemoryStream(Properties.Resources.WaistFiller);
-                        BinaryReader br = new BinaryReader(s);
-                        BaseModel[(int)BodyType.Top].AppendMesh(new GEOM(br));
-                    }
+                SetupBaseModelStitches(partGenders);
 
-                    if (currentGender == AgeGender.Female && currentFrame == AgeGender.Male)
-                    {
-                        if (partGenders[(int)BodyType.Top] == AgeGender.Male)
-                        {
-                            BaseModel[(int)BodyType.Top] = LoadDMapMorph(BaseModel[(int)BodyType.Top], frameBoobs[0], frameBoobs[1]);
-                            GlassModel[(int)BodyType.Top] = LoadDMapMorph(GlassModel[(int)BodyType.Top], frameBoobs[0], frameBoobs[1]);
-                            partGenders[(int)BodyType.Top] = AgeGender.Female;
-                        }
-                        if (partGenders[(int)BodyType.Body] == AgeGender.Male)
-                        {
-                            BaseModel[(int)BodyType.Body] = LoadDMapMorph(BaseModel[(int)BodyType.Body], frameBoobs[0], frameBoobs[1]);
-                            GlassModel[(int)BodyType.Body] = LoadDMapMorph(GlassModel[(int)BodyType.Body], frameBoobs[0], frameBoobs[1]);
-                            partGenders[(int)BodyType.Body] = AgeGender.Female;
-                        }
-                    }
+                ApplyDMAPMorphs();
 
-                    for (int i = 0; i < BaseModel.Length; i++)
-                    {
-                        if ((currentFrame & partGenders[i]) == 0)
-                        {
-                            BaseModel[i] = LoadDMapMorph(BaseModel[i], frameModifier[0], frameModifier[1]);
-                            GlassModel[i] = LoadDMapMorph(GlassModel[i], frameModifier[0], frameModifier[1]);
-                        }
-                    }
-
-                    if (currentGender == AgeGender.Male)
-                    {
-                        if (partGenders[(int)BodyType.Top] == AgeGender.Female)
-                        {
-                            LoadBONDMorph(BaseModel[(int)BodyType.Top], frameModifierFlat, currentRig);
-                            LoadBONDMorph(GlassModel[(int)BodyType.Top], frameModifierFlat, currentRig);
-                        }
-                        if (partGenders[(int)BodyType.Body] == AgeGender.Female)
-                        {
-                            LoadBONDMorph(BaseModel[(int)BodyType.Body], frameModifierFlat, currentRig);
-                            LoadBONDMorph(GlassModel[(int)BodyType.Body], frameModifierFlat, currentRig);
-                        }
-                    }
-                }
-                else if (BaseModel != null && currentSpecies == Species.Human && currentAge == AgeGender.Child)
-                {
-                    if (BaseModel[(int)BodyType.Body] != null) BaseModel[(int)BodyType.Body].AutoSeamStitches(Species.Human, AgeGender.Child, AgeGender.Unisex, 0);
-                    if (BaseModel[(int)BodyType.Bottom] != null) BaseModel[(int)BodyType.Bottom].AutoSeamStitches(Species.Human, AgeGender.Child, AgeGender.Unisex, 0);
-                    if (BaseModel[(int)BodyType.Shoes] != null) BaseModel[(int)BodyType.Shoes].AutoSeamStitches(Species.Human, AgeGender.Child, AgeGender.Unisex, 0);
-                }
-
-                for (int d = 0; d < morphShape.Count; d++)
-                {
-                    for (int i = 0; i < GlassModel.Length; i++) GlassModel[i] = LoadDMapMorph(GlassModel[i], morphShape[d], morphNormals[d]);
-                    for (int i = 0; i < BaseModel.Length; i++) BaseModel[i] = LoadDMapMorph(BaseModel[i], morphShape[d], morphNormals[d]);
-                }
-
-                foreach (BOND b in morphBOND)
-                {
-                    float weight = b.weight;
-                    if (currentGender == AgeGender.Female && (partGenders[(int)BodyType.Top] == AgeGender.Male || partGenders[(int)BodyType.Body] == AgeGender.Male))
-                    {
-                        Dictionary<ulong, string> dmapConvert = CASTuning.DmapConversions(currentSpecies, currentOccult, currentAge, currentGender,
-                            partGenders[(int)BodyType.Top] == AgeGender.Male ? BodyType.Top : BodyType.Body, AgeGender.Male);
-                        string dmapName;
-                        if (dmapConvert != null && dmapConvert.TryGetValue(b.publicKey[0].Instance, out dmapName))
-                        {
-                            b.weight = 0;
-                            ulong shapeInstance = FNVhash.FNV64(dmapName + "_shape");
-                            DMap shape = FetchGameDMap(new TGI((uint)ResourceTypes.DeformerMap, 0, shapeInstance), ref errorList);
-                            ulong normalInstance = FNVhash.FNV64(dmapName + "_normals");
-                            DMap normals = FetchGameDMap(new TGI((uint)ResourceTypes.DeformerMap, 0, normalInstance), ref errorList);
-                            shape.weight = weight;
-                            normals.weight = weight;
-                            for (int i = 0; i < GlassModel.Length; i++) GlassModel[i] = LoadDMapMorph(GlassModel[i], shape, normals);
-                            for (int i = 0; i < BaseModel.Length; i++) BaseModel[i] = LoadDMapMorph(BaseModel[i], shape, normals);
-                        }
-                    }
-                    if (b.weight > 0)
-                    {
-                        LoadBONDMorph(GlassModel, b, currentRig, false);
-                        LoadBONDMorph(BaseModel, b, currentRig);
-                    }
-                    b.weight = weight;
-                }
-
-                if (BaseModel != null)
-                {
-                    for (int i = 0; i < BaseModel.Length; i++)
-                    {
-                        //BaseModel[i].MatchPartSeamStitches();
-                        if (BaseModel[i] != null) BaseModel[i].SnapVertices();
-                    }
-                }
-
-                if (currentSpecies == Species.Human)
-                {
-                    if (BaseModel[(int)BodyType.Head] != null)
-                    {
-                        if (BaseModel[(int)BodyType.Body] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Head], BaseModel[(int)BodyType.Body], BaseModel[(int)BodyType.Hair], GlassModel[(int)BodyType.Hair]);
-                        else if (BaseModel[(int)BodyType.Top] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Head], BaseModel[(int)BodyType.Top], BaseModel[(int)BodyType.Hair], GlassModel[(int)BodyType.Hair]);
-                    }
-                    if (BaseModel[(int)BodyType.Top] != null) BaseModel[(int)BodyType.Top].MatchPartSeamStitches();
-                    if (BaseModel[(int)BodyType.Top] != null && (BaseModel[(int)BodyType.Bottom] != null)) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Top], BaseModel[(int)BodyType.Bottom]);
-                    if (BaseModel[(int)BodyType.Shoes] != null)
-                    {
-                        if (BaseModel[(int)BodyType.Body] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Body], BaseModel[(int)BodyType.Shoes]);
-                        else if (BaseModel[(int)BodyType.Bottom] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Bottom], BaseModel[(int)BodyType.Shoes]);
-                    }
-                }
-                else
-                {
-                    if (BaseModel[(int)BodyType.Head] != null)
-                    {
-                        if (BaseModel[(int)BodyType.Body] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Head], BaseModel[(int)BodyType.Body]);
-                        if (BaseModel[(int)BodyType.Ears] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Head], BaseModel[(int)BodyType.Ears]);
-                    }
-                    if (BaseModel[(int)BodyType.Body] != null)
-                    {
-                        if (BaseModel[(int)BodyType.Shoes] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Body], BaseModel[(int)BodyType.Shoes]);
-                        if (BaseModel[(int)BodyType.Tail] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Body], BaseModel[(int)BodyType.Tail]);
-                    }
-                }
-
-                if (pregnancyProgress > 0f)
-                {
-                    if (currentSpecies == Species.Human)
-                    {
-                        if (pregnantModifier[0] != null) pregnantModifier[0].weight = pregnancyProgress / 1.25f;
-                        if (pregnantModifier[1] != null) pregnantModifier[1].weight = pregnancyProgress / 1.25f;
-                        for (int i = 0; i < BaseModel.Length; i++)
-                        {
-                            if (i == (int)BodyType.Body || i == (int)BodyType.Top || i == (int)BodyType.Bottom)
-                                CurrentModel[i] = LoadDMapMorph(BaseModel[i], pregnantModifier[0], pregnantModifier[1]);
-                            else
-                                CurrentModel[i] = BaseModel[i] != null ? new GEOM(BaseModel[i]) : null;
-                        }
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < BaseModel.Length; i++)
-                    {
-                        CurrentModel[i] = BaseModel[i] != null ? new GEOM(BaseModel[i]) : null;
-                    }
-                }
+                ApplySliders(partGenders);
+                SnapVertices();
+                MatchSeamStitches();
+                ApplyPregnancfyProgress();
                 UpdateSlotTargets();
                 // imageStack.Sort((x, y) => x.sortLayer.CompareTo(y.sortLayer));
                 // imageStack.OrderByDescending(s => s.compositionMethod).ThenBy(s => s.sortLayer).ToList();
@@ -793,14 +648,8 @@ namespace TS4SimRipper
                     int ret = -x.compositionMethod.CompareTo(y.compositionMethod);
                     return ret != 0 ? ret : x.sortLayer.CompareTo(y.sortLayer);
                 });
-                Bitmap image = new Bitmap(currentSize.Width, currentSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-                Bitmap spec = new Bitmap(currentSize.Width / 2, currentSize.Height / 2, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                Bitmap clothing = new Bitmap(currentSize.Width, currentSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-                Bitmap clothingSpec = new Bitmap(currentSize.Width / 2, currentSize.Height / 2, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                Bitmap makeup = new Bitmap(currentSize.Width, currentSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                Bitmap makeupSpec = new Bitmap(currentSize.Width / 2, currentSize.Height / 2, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                Bitmap bump = new Bitmap(1024, 2048, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                using (Graphics gs = Graphics.FromImage(bump))
+                Bitmap image, spec, clothing, clothingSpec, makeup, makeupSpec, bump;
+                IntiializeTextures(out image, out spec, out clothing, out clothingSpec, out makeup, out makeupSpec, out bump); using (Graphics gs = Graphics.FromImage(bump))
                 {
                     gs.Clear(Color.Gray);
                 }
@@ -841,7 +690,7 @@ namespace TS4SimRipper
                         // 4 = special makeup?             
                         if (imageStack[i].image != null && imageStack[i].compositionMethod != 3)
                         {
-                            if(Math.Abs(imageStack[i].HueShift) > 0.001 || Math.Abs(imageStack[i].SaturationShift) > 0.001 || Math.Abs(imageStack[i].BrightnessShift) > 0.001)
+                            if (Math.Abs(imageStack[i].HueShift) > 0.001 || Math.Abs(imageStack[i].SaturationShift) > 0.001 || Math.Abs(imageStack[i].BrightnessShift) > 0.001)
                             {
                                 ShiftTexture((Bitmap)imageStack[i].image, imageStack[i].HueShift, imageStack[i].SaturationShift, imageStack[i].BrightnessShift);
 
@@ -1118,6 +967,189 @@ namespace TS4SimRipper
                         }
                     }
                     if (currentOverlay != null) g.DrawImage(currentOverlay, new Point(0, 0));
+                }
+            }
+        }
+
+        private void SetupBaseModelStitches(AgeGender[] partGenders)
+        {
+            if (BaseModel != null && currentSpecies == Species.Human && currentAge > AgeGender.Child)
+            {
+                //if (partGenders[(int)BodyType.Top] == AgeGender.Female && partGenders[(int)BodyType.Bottom] == AgeGender.Male) BaseModel[(int)BodyType.Top].FillWaistGap(BaseModel[(int)BodyType.Bottom]);
+                if (partGenders[(int)BodyType.Top] == AgeGender.Female && partGenders[(int)BodyType.Bottom] == AgeGender.Male)
+                {
+                    BaseModel[(int)BodyType.Top].AutoSeamStitches(Species.Human, AgeGender.Adult, AgeGender.Female, 0);
+                    BaseModel[(int)BodyType.Bottom].AutoSeamStitches(Species.Human, AgeGender.Adult, AgeGender.Male, 0);
+                    Stream s = new MemoryStream(Properties.Resources.WaistFiller);
+                    BinaryReader br = new BinaryReader(s);
+                    BaseModel[(int)BodyType.Top].AppendMesh(new GEOM(br));
+                }
+
+                if (currentGender == AgeGender.Female && currentFrame == AgeGender.Male)
+                {
+                    if (partGenders[(int)BodyType.Top] == AgeGender.Male)
+                    {
+                        BaseModel[(int)BodyType.Top] = LoadDMapMorph(BaseModel[(int)BodyType.Top], frameBoobs[0], frameBoobs[1]);
+                        GlassModel[(int)BodyType.Top] = LoadDMapMorph(GlassModel[(int)BodyType.Top], frameBoobs[0], frameBoobs[1]);
+                        partGenders[(int)BodyType.Top] = AgeGender.Female;
+                    }
+                    if (partGenders[(int)BodyType.Body] == AgeGender.Male)
+                    {
+                        BaseModel[(int)BodyType.Body] = LoadDMapMorph(BaseModel[(int)BodyType.Body], frameBoobs[0], frameBoobs[1]);
+                        GlassModel[(int)BodyType.Body] = LoadDMapMorph(GlassModel[(int)BodyType.Body], frameBoobs[0], frameBoobs[1]);
+                        partGenders[(int)BodyType.Body] = AgeGender.Female;
+                    }
+                }
+
+                for (int i = 0; i < BaseModel.Length; i++)
+                {
+                    if ((currentFrame & partGenders[i]) == 0)
+                    {
+                        BaseModel[i] = LoadDMapMorph(BaseModel[i], frameModifier[0], frameModifier[1]);
+                        GlassModel[i] = LoadDMapMorph(GlassModel[i], frameModifier[0], frameModifier[1]);
+                    }
+                }
+
+                if (currentGender == AgeGender.Male)
+                {
+                    if (partGenders[(int)BodyType.Top] == AgeGender.Female)
+                    {
+                        LoadBONDMorph(BaseModel[(int)BodyType.Top], frameModifierFlat, currentRig);
+                        LoadBONDMorph(GlassModel[(int)BodyType.Top], frameModifierFlat, currentRig);
+                    }
+                    if (partGenders[(int)BodyType.Body] == AgeGender.Female)
+                    {
+                        LoadBONDMorph(BaseModel[(int)BodyType.Body], frameModifierFlat, currentRig);
+                        LoadBONDMorph(GlassModel[(int)BodyType.Body], frameModifierFlat, currentRig);
+                    }
+                }
+            }
+            else if (BaseModel != null && currentSpecies == Species.Human && currentAge == AgeGender.Child)
+            {
+                if (BaseModel[(int)BodyType.Body] != null) BaseModel[(int)BodyType.Body].AutoSeamStitches(Species.Human, AgeGender.Child, AgeGender.Unisex, 0);
+                if (BaseModel[(int)BodyType.Bottom] != null) BaseModel[(int)BodyType.Bottom].AutoSeamStitches(Species.Human, AgeGender.Child, AgeGender.Unisex, 0);
+                if (BaseModel[(int)BodyType.Shoes] != null) BaseModel[(int)BodyType.Shoes].AutoSeamStitches(Species.Human, AgeGender.Child, AgeGender.Unisex, 0);
+            }
+        }
+
+        private void ApplyDMAPMorphs()
+        {
+            for (int d = 0; d < morphShape.Count; d++)
+            {
+                for (int i = 0; i < GlassModel.Length; i++) GlassModel[i] = LoadDMapMorph(GlassModel[i], morphShape[d], morphNormals[d]);
+                for (int i = 0; i < BaseModel.Length; i++) BaseModel[i] = LoadDMapMorph(BaseModel[i], morphShape[d], morphNormals[d]);
+            }
+        }
+
+        private void SnapVertices()
+        {
+            if (BaseModel != null)
+            {
+                for (int i = 0; i < BaseModel.Length; i++)
+                {
+                    //BaseModel[i].MatchPartSeamStitches();
+                    if (BaseModel[i] != null) BaseModel[i].SnapVertices();
+                }
+            }
+        }
+
+        private void ApplySliders(AgeGender[] partGenders)
+        {
+            foreach (BOND b in morphBOND)
+            {
+                float weight = b.weight;
+                if (currentGender == AgeGender.Female && (partGenders[(int)BodyType.Top] == AgeGender.Male || partGenders[(int)BodyType.Body] == AgeGender.Male))
+                {
+                    Dictionary<ulong, string> dmapConvert = CASTuning.DmapConversions(currentSpecies, currentOccult, currentAge, currentGender,
+                        partGenders[(int)BodyType.Top] == AgeGender.Male ? BodyType.Top : BodyType.Body, AgeGender.Male);
+                    string dmapName;
+                    if (dmapConvert != null && dmapConvert.TryGetValue(b.publicKey[0].Instance, out dmapName))
+                    {
+                        b.weight = 0;
+                        ulong shapeInstance = FNVhash.FNV64(dmapName + "_shape");
+                        DMap shape = FetchGameDMap(new TGI((uint)ResourceTypes.DeformerMap, 0, shapeInstance), ref errorList);
+                        ulong normalInstance = FNVhash.FNV64(dmapName + "_normals");
+                        DMap normals = FetchGameDMap(new TGI((uint)ResourceTypes.DeformerMap, 0, normalInstance), ref errorList);
+                        shape.weight = weight;
+                        normals.weight = weight;
+                        for (int i = 0; i < GlassModel.Length; i++) GlassModel[i] = LoadDMapMorph(GlassModel[i], shape, normals);
+                        for (int i = 0; i < BaseModel.Length; i++) BaseModel[i] = LoadDMapMorph(BaseModel[i], shape, normals);
+                    }
+                }
+                if (b.weight > 0)
+                {
+                    LoadBONDMorph(GlassModel, b, currentRig, false);
+                    LoadBONDMorph(BaseModel, b, currentRig);
+                }
+                b.weight = weight;
+            }
+        }
+
+        private void IntiializeTextures(out Bitmap image, out Bitmap spec, out Bitmap clothing, out Bitmap clothingSpec, out Bitmap makeup, out Bitmap makeupSpec, out Bitmap bump)
+        {
+            image = new Bitmap(currentSize.Width, currentSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            spec = new Bitmap(currentSize.Width / 2, currentSize.Height / 2, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            clothing = new Bitmap(currentSize.Width, currentSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            clothingSpec = new Bitmap(currentSize.Width / 2, currentSize.Height / 2, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            makeup = new Bitmap(currentSize.Width, currentSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            makeupSpec = new Bitmap(currentSize.Width / 2, currentSize.Height / 2, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            bump = new Bitmap(1024, 2048, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        }
+
+        private void MatchSeamStitches()
+        {
+            if (currentSpecies == Species.Human)
+            {
+                if (BaseModel[(int)BodyType.Head] != null)
+                {
+                    if (BaseModel[(int)BodyType.Body] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Head], BaseModel[(int)BodyType.Body], BaseModel[(int)BodyType.Hair], GlassModel[(int)BodyType.Hair]);
+                    else if (BaseModel[(int)BodyType.Top] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Head], BaseModel[(int)BodyType.Top], BaseModel[(int)BodyType.Hair], GlassModel[(int)BodyType.Hair]);
+                }
+                if (BaseModel[(int)BodyType.Top] != null) BaseModel[(int)BodyType.Top].MatchPartSeamStitches();
+                if (BaseModel[(int)BodyType.Top] != null && (BaseModel[(int)BodyType.Bottom] != null)) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Top], BaseModel[(int)BodyType.Bottom]);
+                if (BaseModel[(int)BodyType.Shoes] != null)
+                {
+                    if (BaseModel[(int)BodyType.Body] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Body], BaseModel[(int)BodyType.Shoes]);
+                    else if (BaseModel[(int)BodyType.Bottom] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Bottom], BaseModel[(int)BodyType.Shoes]);
+                }
+            }
+            else
+            {
+                if (BaseModel[(int)BodyType.Head] != null)
+                {
+                    if (BaseModel[(int)BodyType.Body] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Head], BaseModel[(int)BodyType.Body]);
+                    if (BaseModel[(int)BodyType.Ears] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Head], BaseModel[(int)BodyType.Ears]);
+                }
+                if (BaseModel[(int)BodyType.Body] != null)
+                {
+                    if (BaseModel[(int)BodyType.Shoes] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Body], BaseModel[(int)BodyType.Shoes]);
+                    if (BaseModel[(int)BodyType.Tail] != null) GEOM.MatchSeamStitches(BaseModel[(int)BodyType.Body], BaseModel[(int)BodyType.Tail]);
+                }
+            }
+        }
+
+        private void ApplyPregnancfyProgress()
+        {
+            if (pregnancyProgress > 0f)
+            {
+                if (currentSpecies == Species.Human)
+                {
+                    if (pregnantModifier[0] != null) pregnantModifier[0].weight = pregnancyProgress / 1.25f;
+                    if (pregnantModifier[1] != null) pregnantModifier[1].weight = pregnancyProgress / 1.25f;
+                    for (int i = 0; i < BaseModel.Length; i++)
+                    {
+                        if (i == (int)BodyType.Body || i == (int)BodyType.Top || i == (int)BodyType.Bottom)
+                            CurrentModel[i] = LoadDMapMorph(BaseModel[i], pregnantModifier[0], pregnantModifier[1]);
+                        else
+                            CurrentModel[i] = BaseModel[i] != null ? new GEOM(BaseModel[i]) : null;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < BaseModel.Length; i++)
+                {
+                    CurrentModel[i] = BaseModel[i] != null ? new GEOM(BaseModel[i]) : null;
                 }
             }
         }
