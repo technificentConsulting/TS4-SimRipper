@@ -381,14 +381,15 @@ namespace TS4SimRipper
         }
         private BGEO FetchGameBGEO(TGI tgi, ref string errorMsg)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) return null;
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
-            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
 
             if (this.allInstances.ContainsKey(key))
             {
+                string err = "";
+                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+
                 Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
 
@@ -416,12 +417,12 @@ namespace TS4SimRipper
         }
         private DMap FetchGameDMap(TGI tgi, ref string errorMsg)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) return null;
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
-            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;    
             {
+                string err = "";
+                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
 
                 if (this.allInstances.ContainsKey(key))
                 {
@@ -452,15 +453,16 @@ namespace TS4SimRipper
 
         private BOND FetchGameBOND(TGI tgi, ref string errorMsg)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) return null;
 
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
 
-            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
             if (this.allInstances.ContainsKey(key))
             {
+                string err = "";
+                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+
                 Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
@@ -487,14 +489,15 @@ namespace TS4SimRipper
 
         private CASP FetchGameCASP(TGI tgi, out string packageName, BodyType partType, int outfitNumber, ref string errorMsg, bool saveme)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) { packageName = ""; return null; }
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
 
-            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
             if (this.allInstances.ContainsKey(key))
             {
+                string err = "";
+                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+
                 Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
@@ -526,14 +529,16 @@ namespace TS4SimRipper
         }
         private GEOM FetchGameGEOM(TGI tgi, string packname, int outfitNumber, ref string errorMsg)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) return null;
+            string err = "";
+
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
 
-            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
             if (this.allInstances.ContainsKey(key))
             {
+                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+
                 Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
@@ -734,7 +739,6 @@ namespace TS4SimRipper
         }
         private Bitmap FetchGameImageFromLRLE(TGI tgi, int outfitNumber, ref string errorMsg, bool writeLog)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) return null;
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
@@ -839,14 +843,15 @@ namespace TS4SimRipper
 
         private DSTResource FetchGameDST(TGI tgi, int outfitNumber, ref string errorMsg)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) return null;
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
 
-            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
             if (this.allInstances.ContainsKey(key))
             {
+                string err = "";
+                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+
                 Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
@@ -870,14 +875,15 @@ namespace TS4SimRipper
         }
         private Bitmap FetchGameImageFromDST(TGI tgi, int outfitNumber, ref string errorMsg)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) return null;
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
 
-            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
             if (this.allInstances.ContainsKey(key))
             {
+                string err = "";
+                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+
                 Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
@@ -911,13 +917,15 @@ namespace TS4SimRipper
 
         private DdsFile FetchGameDDS(TGI tgi, int outfitNumber, ref string errorMsg)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) return null;
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
-            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
             if (this.allInstances.ContainsKey(key))
             {
+                string err = "";
+                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+
+
                 Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
@@ -942,14 +950,15 @@ namespace TS4SimRipper
         }
         private Bitmap FetchGameImageFromDDS(TGI tgi, int outfitNumber, ref string errorMsg, bool writeLog)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) return null;
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
 
-            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
             if (this.allInstances.ContainsKey(key))
             {
+                string err = "";
+                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+
                 Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
 
@@ -981,13 +990,14 @@ namespace TS4SimRipper
         }
         private TONE FetchGameTONE(TGI tgi, out string packageName, ref string errorMsg)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) { packageName = ""; return null; }
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
-            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
             if (this.allInstances.ContainsKey(key))
-            { 
+            {
+                string err = "";
+                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+
                 Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
@@ -1016,14 +1026,15 @@ namespace TS4SimRipper
         }
         private PeltLayer FetchGamePeltLayer(TGI tgi, ref string errorMsg)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) return null;
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
 
-            Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
             if (this.allInstances.ContainsKey(key))
             {
+                string err = "";
+                Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
+
                 Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
@@ -1049,7 +1060,6 @@ namespace TS4SimRipper
         }
         private RIG FetchGameRig(TGI tgi, ref string errorMsg)
         {
-            string err = "";
 
             if (tgi.Instance == 0ul) return null;
             (uint ResourceType, uint ResourceGroup, ulong Instance) key = (tgi.Type, tgi.Group, tgi.Instance);
@@ -1057,6 +1067,8 @@ namespace TS4SimRipper
             Predicate<IResourceIndexEntry> pred = r => (r.ResourceType == tgi.Type) & r.ResourceGroup == tgi.Group & r.Instance == tgi.Instance;
             if (this.allInstances.ContainsKey(key))
             {
+                string err = "";
+
                 Package p = this.allInstances[key].Item2;
                 IResourceIndexEntry irie = p.Find(pred);
                 if (irie != null)
