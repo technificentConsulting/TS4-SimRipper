@@ -3,6 +3,8 @@
 
 Many thanks to her for allowing me to continue this project!
 
+Improvements in this version currently include performance improvements with lots of CC and Mods, the ability to craete rigs for in-game IK, and improved startup time!
+
 # Get support here on [Discord!](https://discord.gg/E6VJF7XgbA)
 
 Original Description, modified to remove older release notes, is as follows.
