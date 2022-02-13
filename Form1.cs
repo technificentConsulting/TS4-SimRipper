@@ -23,6 +23,7 @@ namespace TS4SimRipper
         string version = "TS4 SimRipper v4.0.2";
         int maxThreads = 1;
         int currentThreadIndex = 0;
+        string saveFileBatch = "";
         ulong[] frameIDMtF4male = new ulong[] { 0x27FE2BD7D11FDE65UL, 0x7A9D44AB67D00802UL };
         ulong[] frameIDMtF4female = new ulong[] { 0xA1A3F64ED26BCED8UL, 0x8ABEBBC4544AAE5BUL };
         ulong[] frameIDFtM = new ulong[] { 0x73290F92433C9DCCUL, 0xBD2A4BDE5C973977UL };
@@ -69,12 +70,7 @@ namespace TS4SimRipper
         public Form1()
         {
             InitializeComponent();
-            string[] args = Environment.GetCommandLineArgs();
-            if(args.Count() >= 2)
-            {
-                int.TryParse(args[0], out maxThreads);
-                int.TryParse(args[1], out currentThreadIndex);
-            }
+
 
 
             this.Text = version;
@@ -142,7 +138,48 @@ namespace TS4SimRipper
             else if (Properties.Settings.Default.SkinBlendIndex == 2) SkinBlend2_radioButton.Checked = true;
             else if (Properties.Settings.Default.SkinBlendIndex == 3) SkinBlend3_radioButton.Checked = true;
             NormalConvert_checkBox.Checked = Properties.Settings.Default.ConvertBump;
+            string[] args = Environment.GetCommandLineArgs();
+            Console.Write(args.ToString());
+            if (args.Count() >= 4)
+            {
+                int.TryParse(args[2], out maxThreads);
+                int.TryParse(args[3], out currentThreadIndex);
+                this.saveFileBatch = args[4];
+            }
+
+            this.SaveFileBatchProcess();
+
         }
+        private void SaveFileBatchProcess()
+        {
+            Console.Write(this.saveFileBatch);
+            if (this.saveFileBatch.Length == 0) return;
+            Package p = (Package)Package.OpenPackage(0, this.saveFileBatch, false);
+            Predicate<IResourceIndexEntry> idel = r => r.ResourceType == 0x0000000D;
+            IResourceIndexEntry iries = p.Find(idel);
+            Stream s = p.GetResource(iries);
+            TS4SaveGame.SaveGameData save = Serializer.Deserialize<TS4SaveGame.SaveGameData>(s);
+            GameName.Text = save.save_slot.slot_name;
+            worldNames = new Dictionary<ulong, string>();
+            if (save.zones != null)
+            {
+                foreach (TS4SaveGame.ZoneData zone in save.zones)
+                {
+                    foreach (TS4SaveGame.NeighborhoodData neighborhood in save.neighborhoods)
+                    {
+                        if (neighborhood.neighborhood_id == zone.neighborhood_id)
+                        {
+                            if (!worldNames.ContainsKey(zone.zone_id)) worldNames.Add(zone.zone_id, neighborhood.name);
+                        }
+                    }
+                }
+            }
+            currentSaveGame = p;
+            currentSaveName = GameName.Text;
+            simsArray = save.sims;
+            ListSims();
+        }
+
 
         private void SaveGameFile_button_Click(object sender, EventArgs e)
         {
@@ -193,19 +230,23 @@ namespace TS4SimRipper
                 if (simsArray[i].age == (uint)AgeGender.YoungAdult)
                 { 
                 simsList.Add(new SimListing(simsArray[i]));
-                readSimThenSave(new SimListing(simsArray[i]));
                 }
             }
-            if (SortBy_comboBox.SelectedIndex == 1)
-            {
-                simsList.Sort((x, y) => x.sortNameFirst.CompareTo(y.sortNameFirst));
-            }
+            simsList.Sort((x, y) => x.sortNameFirst.CompareTo(y.sortNameFirst));
             sims_listBox.Items.Clear();
             for (int i = 0; i < simsList.Count; i++)
             {
                 sims_listBox.Items.Add(simsList[i]);
             }
-            
+            for (int i = 0; i < simsList.Count; i++)
+            {
+                if ((i - this.currentThreadIndex) % this.maxThreads == 0)
+                {
+                    readSimThenSave(new SimListing(simsArray[i]));
+
+                }
+
+            }
         }
 
         public class SimListing
@@ -1219,7 +1260,7 @@ namespace TS4SimRipper
            // saveFileDialog1.CheckPathExists = true;
            // saveFileDialog1.DefaultExt = "dae";
            // saveFileDialog1.OverwritePrompt = true;
-            string defaultFilename = path + "\\" + basename + ".dae";
+            string defaultFilename = path + @"\" + basename + ".dae";
            // if (defaultFilename != null && String.CompareOrdinal(defaultFilename, " ") > 0) saveFileDialog1.FileName = defaultFilename;
            // if (saveFileDialog1.ShowDialog() == DialogResult.OK)
            // {
