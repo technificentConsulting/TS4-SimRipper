@@ -18,8 +18,11 @@ namespace TS4SimRipper
 {
     public partial class Form1 : Form
     {
+
         /// Remember to update this for each update!
         string version = "TS4 SimRipper v4.0.2";
+        int maxThreads = 1;
+        int currentThreadIndex = 0;
         ulong[] frameIDMtF4male = new ulong[] { 0x27FE2BD7D11FDE65UL, 0x7A9D44AB67D00802UL };
         ulong[] frameIDMtF4female = new ulong[] { 0xA1A3F64ED26BCED8UL, 0x8ABEBBC4544AAE5BUL };
         ulong[] frameIDFtM = new ulong[] { 0x73290F92433C9DCCUL, 0xBD2A4BDE5C973977UL };
@@ -66,6 +69,14 @@ namespace TS4SimRipper
         public Form1()
         {
             InitializeComponent();
+            string[] args = Environment.GetCommandLineArgs();
+            if(args.Count() >= 2)
+            {
+                int.TryParse(args[0], out maxThreads);
+                int.TryParse(args[1], out currentThreadIndex);
+            }
+
+
             this.Text = version;
             physiqueNamesHuman = new string[] { "Body_Heavy", "Body_Fit", "Body_Lean", "Body_Bony", "Body_Pregnant", "Hips_Wide", "Hips_Narrow", "Waist_Wide", "Waist_Narrow" };
             physiqueNamesAnimal = new string[] { "headModifier_Body_Fat", "headModifier_Body_Fit", "headModifier_Body_Skinny", "headModifier_Body_Bony",
@@ -188,14 +199,6 @@ namespace TS4SimRipper
             if (SortBy_comboBox.SelectedIndex == 1)
             {
                 simsList.Sort((x, y) => x.sortNameFirst.CompareTo(y.sortNameFirst));
-            }
-            else if (SortBy_comboBox.SelectedIndex == 2)
-            {
-                simsList.Sort((x, y) => x.sortHousehold.CompareTo(y.sortHousehold));
-            }
-            else
-            {
-                simsList.Sort((x, y) => x.sortNameLast.CompareTo(y.sortNameLast));
             }
             sims_listBox.Items.Clear();
             for (int i = 0; i < simsList.Count; i++)
