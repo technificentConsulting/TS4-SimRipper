@@ -90,12 +90,18 @@
             this.morphPreview1 = new TS4SimRipper.MorphPreview();
             this.levelOfDetailUpDown = new System.Windows.Forms.NumericUpDown();
             this.label13 = new System.Windows.Forms.Label();
+            this.threadsMax = new System.Windows.Forms.Label();
+            this.maxThreadsUpDown = new System.Windows.Forms.NumericUpDown();
+            this.currentThread = new System.Windows.Forms.Label();
+            this.currentThreadUpDown = new System.Windows.Forms.NumericUpDown();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Pregnancy_trackBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.BoneSize_numericUpDown)).BeginInit();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.levelOfDetailUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.maxThreadsUpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.currentThreadUpDown)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -400,7 +406,7 @@
             this.NormalConvert_checkBox.AutoSize = true;
             this.NormalConvert_checkBox.Checked = true;
             this.NormalConvert_checkBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.NormalConvert_checkBox.Location = new System.Drawing.Point(870, 309);
+            this.NormalConvert_checkBox.Location = new System.Drawing.Point(870, 318);
             this.NormalConvert_checkBox.Name = "NormalConvert_checkBox";
             this.NormalConvert_checkBox.Size = new System.Drawing.Size(107, 17);
             this.NormalConvert_checkBox.TabIndex = 61;
@@ -755,7 +761,7 @@
             // levelOfDetailUpDown
             // 
             this.levelOfDetailUpDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.levelOfDetailUpDown.Location = new System.Drawing.Point(761, 309);
+            this.levelOfDetailUpDown.Location = new System.Drawing.Point(941, 297);
             this.levelOfDetailUpDown.Maximum = new decimal(new int[] {
             3,
             0,
@@ -770,17 +776,67 @@
             // 
             this.label13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(690, 313);
+            this.label13.Location = new System.Drawing.Point(867, 299);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(73, 13);
             this.label13.TabIndex = 65;
             this.label13.Text = "Level of detail";
+            // 
+            // threadsMax
+            // 
+            this.threadsMax.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.threadsMax.AutoSize = true;
+            this.threadsMax.Location = new System.Drawing.Point(718, 299);
+            this.threadsMax.Name = "threadsMax";
+            this.threadsMax.Size = new System.Drawing.Size(69, 13);
+            this.threadsMax.TabIndex = 67;
+            this.threadsMax.Text = "Max Threads";
+            // 
+            // maxThreadsUpDown
+            // 
+            this.maxThreadsUpDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.maxThreadsUpDown.Location = new System.Drawing.Point(792, 297);
+            this.maxThreadsUpDown.Maximum = new decimal(new int[] {
+            512,
+            0,
+            0,
+            0});
+            this.maxThreadsUpDown.Name = "maxThreadsUpDown";
+            this.maxThreadsUpDown.Size = new System.Drawing.Size(36, 20);
+            this.maxThreadsUpDown.TabIndex = 66;
+            // 
+            // currentThread
+            // 
+            this.currentThread.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.currentThread.AutoSize = true;
+            this.currentThread.Location = new System.Drawing.Point(718, 318);
+            this.currentThread.Name = "currentThread";
+            this.currentThread.Size = new System.Drawing.Size(58, 13);
+            this.currentThread.TabIndex = 69;
+            this.currentThread.Text = "Thread Idx";
+            // 
+            // currentThreadUpDown
+            // 
+            this.currentThreadUpDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.currentThreadUpDown.Location = new System.Drawing.Point(792, 316);
+            this.currentThreadUpDown.Maximum = new decimal(new int[] {
+            512,
+            0,
+            0,
+            0});
+            this.currentThreadUpDown.Name = "currentThreadUpDown";
+            this.currentThreadUpDown.Size = new System.Drawing.Size(36, 20);
+            this.currentThreadUpDown.TabIndex = 68;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(994, 616);
+            this.Controls.Add(this.currentThread);
+            this.Controls.Add(this.currentThreadUpDown);
+            this.Controls.Add(this.threadsMax);
+            this.Controls.Add(this.maxThreadsUpDown);
             this.Controls.Add(this.label13);
             this.Controls.Add(this.levelOfDetailUpDown);
             this.Controls.Add(this.SaveMakeup_button);
@@ -845,6 +901,8 @@
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.levelOfDetailUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.maxThreadsUpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.currentThreadUpDown)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -914,6 +972,10 @@
         private System.Windows.Forms.Button SaveMakeup_button;
         private System.Windows.Forms.NumericUpDown levelOfDetailUpDown;
         private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label threadsMax;
+        private System.Windows.Forms.NumericUpDown maxThreadsUpDown;
+        private System.Windows.Forms.Label currentThread;
+        private System.Windows.Forms.NumericUpDown currentThreadUpDown;
     }
 }
 
