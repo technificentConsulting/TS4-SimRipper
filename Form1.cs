@@ -259,7 +259,7 @@ namespace TS4SimRipper
             {
                 if ((i - this.currentThreadIndex) % this.maxThreads == 0)
                 {
-                    readSimThenSave(new SimListing(simsArray[i]));
+                    readSimThenSave(new SimListing(simsList[i].sim));
 
                 }
 
