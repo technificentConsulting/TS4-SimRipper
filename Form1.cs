@@ -138,9 +138,26 @@ namespace TS4SimRipper
             else if (Properties.Settings.Default.SkinBlendIndex == 2) SkinBlend2_radioButton.Checked = true;
             else if (Properties.Settings.Default.SkinBlendIndex == 3) SkinBlend3_radioButton.Checked = true;
             NormalConvert_checkBox.Checked = Properties.Settings.Default.ConvertBump;
+
             string[] args = Environment.GetCommandLineArgs();
             Console.Write(args.ToString());
-            if (args.Count() >= 4)
+
+            using (StreamWriter outputFile = new StreamWriter("WriteLines.txt"))
+            {
+                for (int i = 0; i < args.Length; i++)
+                {
+                    outputFile.WriteLine(args[i]);
+
+                }
+            }
+
+            if (args.Count() == 3)
+            {
+                int.TryParse(args[1], out maxThreads);
+                int.TryParse(args[2], out currentThreadIndex);
+                this.saveFileBatch = args[3];
+            }
+            else
             {
                 int.TryParse(args[2], out maxThreads);
                 int.TryParse(args[3], out currentThreadIndex);
@@ -1262,7 +1279,6 @@ namespace TS4SimRipper
            // saveFileDialog1.OverwritePrompt = true;
             string defaultFilename = path + @"\" + basename + ".dae";
            // if (defaultFilename != null && String.CompareOrdinal(defaultFilename, " ") > 0) saveFileDialog1.FileName = defaultFilename;
-           // if (saveFileDialog1.ShowDialog() == DialogResult.OK)
            // {
             float boneDivider = ((10f - (float)BoneSize_numericUpDown.Value) / 4f) * 100f; 
             dae.Write(defaultFilename, flipYZ, boneDivider, LinkTexture_checkBox.Checked, SeparateMeshes_comboBox.SelectedIndex == 2);

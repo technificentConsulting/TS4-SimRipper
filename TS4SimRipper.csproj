@@ -249,6 +249,7 @@
     <None Include="bin\x64\Release\multiprocess_run.bat">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="bin\x64\Release\multiprocess_runsingle.bat" />
     <None Include="packages.config" />
     <None Include="Resources\DogSkin.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
