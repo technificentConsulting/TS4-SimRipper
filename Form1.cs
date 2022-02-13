@@ -150,18 +150,18 @@ namespace TS4SimRipper
 
                 }
             }
-
-            if (args.Count() == 3)
-            {
-                int.TryParse(args[1], out maxThreads);
-                int.TryParse(args[2], out currentThreadIndex);
-                this.saveFileBatch = args[3];
-            }
-            else
+            Console.WriteLine(args.Count().ToString());
+            if (args.Count() == 5)
             {
                 int.TryParse(args[2], out maxThreads);
                 int.TryParse(args[3], out currentThreadIndex);
                 this.saveFileBatch = args[4];
+            }
+            else
+            {
+                int.TryParse(args[1], out maxThreads);
+                int.TryParse(args[2], out currentThreadIndex);
+                this.saveFileBatch = args[3];
             }
 
             this.SaveFileBatchProcess();
