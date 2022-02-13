@@ -1407,12 +1407,16 @@ namespace TS4SimRipper
             }
         }
 
-        private void SaveModelMorph(MeshFormat format)
+        private void SaveModelMorph(MeshFormat format, string path)
         {
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
             string savename = "";
             Working_label.Visible = true;
             Working_label.Refresh();
-            string path = Properties.Settings.Default.LastSavePath;
             byte[] tempBytes = System.Text.Encoding.GetEncoding("ISO-8859-8").GetBytes(currentName);
             string basename = System.Text.Encoding.UTF8.GetString(tempBytes).Replace(" ", "");
             List<GEOM> geomList = new List<GEOM>();

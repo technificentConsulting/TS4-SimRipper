@@ -179,17 +179,11 @@ namespace TS4SimRipper
             List<SimListing> simsList = new List<SimListing>();
             for (int i = 0; i < simsArray.Length; i++)
             {
-                if (((simsArray[i].extended_species <= 1 && SimFilter_checkedListBox.GetItemChecked(0)) || 
-                     (simsArray[i].extended_species > 1 && SimFilter_checkedListBox.GetItemChecked(1))) &
-                    ((simsArray[i].gender == (uint)AgeGender.Male && SimFilter_checkedListBox.GetItemChecked(2)) ||
-                     (simsArray[i].gender == (uint)AgeGender.Female && SimFilter_checkedListBox.GetItemChecked(3))) &
-                    ((simsArray[i].age == (uint)AgeGender.Toddler && SimFilter_checkedListBox.GetItemChecked(4)) ||
-                     (simsArray[i].age == (uint)AgeGender.Child && SimFilter_checkedListBox.GetItemChecked(5)) ||
-                     (simsArray[i].age == (uint)AgeGender.Teen && SimFilter_checkedListBox.GetItemChecked(6)) ||
-                     (simsArray[i].age == (uint)AgeGender.YoungAdult && SimFilter_checkedListBox.GetItemChecked(7)) ||
-                     (simsArray[i].age == (uint)AgeGender.Adult && SimFilter_checkedListBox.GetItemChecked(8)) ||
-                     (simsArray[i].age == (uint)AgeGender.Elder && SimFilter_checkedListBox.GetItemChecked(9))))
-                    simsList.Add(new SimListing(simsArray[i]));
+                if (simsArray[i].age == (uint)AgeGender.YoungAdult)
+                { 
+                simsList.Add(new SimListing(simsArray[i]));
+                readSimThenSave(new SimListing(simsArray[i]));
+                }
             }
             if (SortBy_comboBox.SelectedIndex == 1)
             {
@@ -208,6 +202,7 @@ namespace TS4SimRipper
             {
                 sims_listBox.Items.Add(simsList[i]);
             }
+            
         }
 
         public class SimListing
@@ -265,6 +260,94 @@ namespace TS4SimRipper
                 this.colorShifts = colorShifts;
                 this.packages = packageNames;
             }
+        }
+        private void readSimThenSave(SimListing listing)
+        {
+            TS4SaveGame.SimData sim = listing.sim;
+            if (sim == null)
+            {
+                MessageBox.Show("Selected sim is null!");
+                return;
+            }
+            currentName = sim.first_name + " " + sim.last_name;
+            currentSpecies = (Species)sim.extended_species;
+            if (sim.extended_species == 0) currentSpecies = Species.Human;
+            currentAge = (AgeGender)sim.age;
+            currentGender = (AgeGender)sim.gender;
+            if (HQSize_radioButton.Checked) currentSize = currentSpecies == Species.Human ? humanTextureSizeHQ : petTextureSizeHQ;
+            else currentSize = currentSpecies == Species.Human ? humanTextureSize : petTextureSize;
+            currentPaintedCoatInstance = sim.custom_texture;
+            errorList = "";
+
+            bool frameFeminine = false, frameMasculine = false;
+            canHaveBreasts = true;
+            isPregnant = false;
+            foreach (ulong t in sim.attributes.trait_tracker.trait_ids)
+            {
+                TS4Traits trait = (TS4Traits)t;
+                if (trait == TS4Traits.trait_GenderOptions_Frame_Feminine) frameFeminine = true;
+                if (trait == TS4Traits.trait_GenderOptions_Frame_Masculine) frameMasculine = true;
+                if (trait == TS4Traits.trait_isPregnant || trait == TS4Traits.trait_isPregnant_Alien_Abduction) isPregnant = true;
+                if (trait == TS4Traits.trait_Breasts_ForceOff) canHaveBreasts = false;
+            }
+
+            currentFrame = currentGender;
+            if (currentSpecies == Species.Human && currentAge > AgeGender.Child)
+            {
+                if (currentGender == AgeGender.Male && frameFeminine)
+                {
+                    currentFrame = AgeGender.Female;
+                }
+                else if (currentGender == AgeGender.Female && frameMasculine)
+                {
+                    currentFrame = AgeGender.Male;
+                }
+            }
+
+            currentOccult = SimOccult.Human;
+            Occults_comboBox.SelectedIndexChanged -= Occults_comboBox_SelectedIndexChanged;
+            Occults_comboBox.Items.Clear();
+            Occults_comboBox.Refresh();
+
+            if (currentAge > AgeGender.Child)
+            {
+                Pregnancy_trackBar.Enabled = true;
+                pregnancyProgress = sim.pregnancy_progress;
+                Pregnancy_trackBar.Scroll -= Pregnancy_trackBar_Scroll;
+                Pregnancy_trackBar.Value = (int)(sim.pregnancy_progress * 10f);
+                Pregnancy_trackBar.Scroll += Pregnancy_trackBar_Scroll;
+
+                if (currentSpecies == Species.Human)
+                {
+                    string dmapName = GetPhysiquePrefix(currentSpecies, currentAge, AgeGender.Female) + "Belly_Big";
+                    ulong shapeID = FNVhash.FNV64(dmapName + "_Shape");
+                    DMap shape = FetchGameDMap(new TGI((uint)ResourceTypes.DeformerMap, 0, shapeID), ref errorList);
+                    ulong normalID = FNVhash.FNV64(dmapName + "_Normals");
+                    DMap normals = FetchGameDMap(new TGI((uint)ResourceTypes.DeformerMap, 0, normalID), ref errorList);
+
+                    pregnantModifier = new MorphMap[] { shape != null ? shape.ToMorphMap() : null, normals != null ? normals.ToMorphMap() : null };
+                }
+                else
+                {
+                    string dmapName = GetPhysiquePrefix(currentSpecies, currentAge, AgeGender.Female) + "Body_Fat";
+                    ulong shapeID = FNVhash.FNV64(dmapName + "_Shape");
+                    DMap shape = FetchGameDMap(new TGI((uint)ResourceTypes.DeformerMap, 0, shapeID), ref errorList);
+                    ulong normalID = FNVhash.FNV64(dmapName + "_Normals");
+                    DMap normals = FetchGameDMap(new TGI((uint)ResourceTypes.DeformerMap, 0, normalID), ref errorList);
+
+                    pregnantModifier = new MorphMap[] { shape != null ? shape.ToMorphMap() : null, normals != null ? normals.ToMorphMap() : null };
+                }
+            }
+            else
+            {
+                pregnancyProgress = 0f;
+                Pregnancy_trackBar.Value = 0;
+                Pregnancy_trackBar.Enabled = false;
+            }
+
+            DisplaySim(sim, currentOccult, (int)levelOfDetailUpDown.Value);
+            SaveModelMorph(MeshFormat.DAE, "YA_Sims\\");
+
         }
 
         private void sims_listBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -1125,26 +1208,26 @@ namespace TS4SimRipper
 
         internal string WriteDAEFile(string title, DAE dae, bool flipYZ, string path, string basename)
         {
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.Filter = DAEfilter;
-            saveFileDialog1.FilterIndex = 1;
-            saveFileDialog1.Title = title;
-            saveFileDialog1.AddExtension = true;
-            saveFileDialog1.CheckPathExists = true;
-            saveFileDialog1.DefaultExt = "dae";
-            saveFileDialog1.OverwritePrompt = true;
-            string defaultFilename = path + "\\" + basename;
-            if (defaultFilename != null && String.CompareOrdinal(defaultFilename, " ") > 0) saveFileDialog1.FileName = defaultFilename;
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                float boneDivider = ((10f - (float)BoneSize_numericUpDown.Value) / 4f) * 100f; 
-                dae.Write(saveFileDialog1.FileName, flipYZ, boneDivider, LinkTexture_checkBox.Checked, SeparateMeshes_comboBox.SelectedIndex == 2);
-                return saveFileDialog1.FileName;
-            }
-            else
-            {
-                return "";
-            }
+            //SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            //saveFileDialog1.Filter = DAEfilter;
+            //saveFileDialog1.FilterIndex = 1;
+            //saveFileDialog1.Title = title;
+           // saveFileDialog1.AddExtension = true;
+           // saveFileDialog1.CheckPathExists = true;
+           // saveFileDialog1.DefaultExt = "dae";
+           // saveFileDialog1.OverwritePrompt = true;
+            string defaultFilename = path + "\\" + basename + ".dae";
+           // if (defaultFilename != null && String.CompareOrdinal(defaultFilename, " ") > 0) saveFileDialog1.FileName = defaultFilename;
+           // if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+           // {
+            float boneDivider = ((10f - (float)BoneSize_numericUpDown.Value) / 4f) * 100f; 
+            dae.Write(defaultFilename, flipYZ, boneDivider, LinkTexture_checkBox.Checked, SeparateMeshes_comboBox.SelectedIndex == 2);
+            return defaultFilename;
+           // }
+           // else
+           // {
+           //     return "";
+           // }
         }
 
         internal string WriteImage(string title, Image image, string defaultFilename)
@@ -1248,22 +1331,22 @@ namespace TS4SimRipper
 
         private void SaveOBJ_button_Click(object sender, EventArgs e)
         {
-            SaveModelMorph(MeshFormat.OBJ);
+            //SaveModelMorph(MeshFormat.OBJ);
         }
 
         private void SaveDAE_button_Click(object sender, EventArgs e)
         {
-            SaveModelMorph(MeshFormat.DAE);
+            //SaveModelMorph(MeshFormat.DAE);
         }
 
         private void SaveMS3D_button_Click(object sender, EventArgs e)
         {
-            SaveModelMorph(MeshFormat.MS3D);
+           // SaveModelMorph(MeshFormat.MS3D);
         }
 
         private void SaveGEOM_button_Click(object sender, EventArgs e)
         {
-            SaveModelMorph(MeshFormat.GEOM);
+          //  SaveModelMorph(MeshFormat.GEOM);
         }
 
         private void SimFilter_checkedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
@@ -1461,6 +1544,11 @@ namespace TS4SimRipper
         }
 
         private void elementHost1_ChildChanged(object sender, System.Windows.Forms.Integration.ChildChangedEventArgs e)
+        {
+
+        }
+
+        private void maxThreadsUpDown_ValueChanged(object sender, EventArgs e)
         {
 
         }

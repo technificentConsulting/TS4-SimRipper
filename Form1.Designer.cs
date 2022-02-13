@@ -804,6 +804,7 @@
             this.maxThreadsUpDown.Name = "maxThreadsUpDown";
             this.maxThreadsUpDown.Size = new System.Drawing.Size(36, 20);
             this.maxThreadsUpDown.TabIndex = 66;
+            this.maxThreadsUpDown.ValueChanged += new System.EventHandler(this.maxThreadsUpDown_ValueChanged);
             // 
             // currentThread
             // 
